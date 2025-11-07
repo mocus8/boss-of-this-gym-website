@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/src/helpers.php';
-
 session_start();
+
+require_once __DIR__ . '/src/helpers.php';
 
 $userId = $_SESSION['user']['id'] ?? null;
 $orderId = $_GET['orderId'] ?? '';
