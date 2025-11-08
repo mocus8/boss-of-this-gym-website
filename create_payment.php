@@ -46,8 +46,7 @@ try {
     }
 
     $yookassa = new \YooKassa\Client();
-    //тут мб тоже менять постоянно придётся
-    $yookassa->setAuth('1201088', 'test_rpA9Mys4bSs-45HSfQqF_zzu_8ytngW71Veg_yf9ISA');
+    $yookassa->setAuth('1203395', 'test_NxHr2T8jZ4wWKMuegRsBSsWwSyYUwsSJUnCgIBr9HZU');
     
     $payment = $yookassa->createPayment([
         'amount' => [
@@ -56,8 +55,7 @@ try {
         ],
         'confirmation' => [
             'type' => 'redirect',
-            //тут менять пока постоянно первую часть
-            'return_url' => 'bossofthisgym/404.php?orderId=' . $orderId
+            'return_url' => 'https://cw187549.tw1.ru/my_orders.php?orderId=' . $orderId
         ],
         'capture' => true,
         'description' => 'Заказ №' . $orderId,
