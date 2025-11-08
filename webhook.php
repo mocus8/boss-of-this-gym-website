@@ -1,18 +1,19 @@
 <?php
-
-//с логами от сика
-require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/src/helpers.php';
 
-// Включаем логирование
-file_put_contents(__DIR__ . '/webhook.log', date('Y-m-d H:i:s') . " - Webhook called\n", FILE_APPEND);
-
-// Получаем JSON из тела запроса
+// Получаем подпись из заголовка для ее проверки (таким образом не получиться подделать post запроси пометить заказ как оплаченный)
+$signature = $_SERVER['HTTP_SIGNATURE'] ?? '';
 $input = file_get_contents('php://input');
-file_put_contents(__DIR__ . '/webhook.log', "Raw input: " . $input . "\n", FILE_APPEND);
+
+//проверка подписи
+$hash = base64_encode(hash_hmac('sha256', $input, getenv('YOOKASSA_API_KEY'), true));
+if ($signature !== "sha256=" . $hash) {
+    http_response_code(403);
+    error_log("Invalid webhook signature");
+    exit('Invalid signature');
+}
 
 if (empty($input)) {
-    file_put_contents(__DIR__ . '/webhook.log', "ERROR: Empty input\n", FILE_APPEND);
     http_response_code(400);
     exit('Empty request');
 }
@@ -20,89 +21,45 @@ if (empty($input)) {
 $data = json_decode($input, true);
 
 if (json_last_error() !== JSON_ERROR_NONE) {
-    file_put_contents(__DIR__ . '/webhook.log', "ERROR: Invalid JSON\n", FILE_APPEND);
+    error_log("ERROR: Invalid JSON");
     http_response_code(400);
     exit('Invalid JSON');
 }
 
-// Проверяем тип события
-if (isset($data['event']) && $data['event'] === 'payment.succeeded') {
+if ($data['event'] === 'payment.succeeded') {
     $payment = $data['object'];
-    $orderId = $payment['metadata']['orderId'] ?? null;
-    $paymentId = $payment['id'] ?? 'unknown';
-    
-    file_put_contents(__DIR__ . '/webhook.log', "Processing payment: payment_id=$paymentId, order_id=" . ($orderId ?? 'NULL') . "\n", FILE_APPEND);
+    $orderId = $payment['metadata']['orderId'] ?? null;;
     
     if (!$orderId) {
-        file_put_contents(__DIR__ . '/webhook.log', "ERROR: No orderId in metadata\n", FILE_APPEND);
+        error_log("ERROR: No orderId in metadata");
         http_response_code(200); // Все равно возвращаем 200 для ЮКассы
         exit('OK');
     }
-    
+
+    // Обновляем статус заказа
     try {
         $connect = getDB();
         if (!$connect) {
             throw new Exception('Database connection failed');
         }
-        
-        // ОБНОВЛЯЕМ СТАТУС ЗАКАЗА - исправленный запрос
+
         $stmt = $connect->prepare("UPDATE orders SET paid_at = NOW(), status = 'paid' WHERE order_id = ?");
         if (!$stmt) {
             throw new Exception('Prepare failed: ' . $connect->error);
         }
-        
         $stmt->bind_param("i", $orderId);
         $result = $stmt->execute();
-        
-        if ($result) {
-            file_put_contents(__DIR__ . '/webhook.log', "SUCCESS: Order $orderId updated to paid\n", FILE_APPEND);
-        } else {
+        if (!$result) {
             throw new Exception('Execute failed: ' . $stmt->error);
         }
-        
-        $stmt->close();
-        $connect->close();
-        
     } catch (Exception $e) {
-        file_put_contents(__DIR__ . '/webhook.log', "ERROR: " . $e->getMessage() . "\n", FILE_APPEND);
+        // ЛОГИРОВАНИЕ ОШИБОК (в реальном проекте использовать логирование в отдельный файл)
+        error_log("WEBHOOK ERROR: " . $e->getMessage());
+    } finally {
+        if (isset($stmt)) $stmt->close();
+        if (isset($connect)) $connect->close();
     }
-} else {
-    file_put_contents(__DIR__ . '/webhook.log', "Ignored event: " . ($data['event'] ?? 'unknown') . "\n", FILE_APPEND);
 }
-
-// Всегда возвращаем 200 OK для ЮКассы
 http_response_code(200);
 echo 'OK';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//нормальная версия без логов 
-// require_once __DIR__ . '/helpers.php';
-
-// $input = file_get_contents('php://input');
-// $data = json_decode($input, true);
-
-// if ($data['event'] === 'payment.succeeded') {
-//     $payment = $data['object'];
-//     $orderId = $payment['metadata']['orderId'];
-    
-//     // Обновляем статус заказа
-//     $connect = getDB();
-//     $stmt = $connect->prepare("UPDATE orders SET paid_at = NOW(), status = 'paid' WHERE order_id = ?");
-//     $stmt->bind_param("i", $orderId);
-//     $stmt->execute();
-// }
-
-// http_response_code(200);
 ?>

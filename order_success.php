@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/src/helpers.php';
+require_once __DIR__ . '/src/checkYooKassaStatus.php';
 
 $userId = $_SESSION['user']['id'] ?? null;
 $orderId = $_GET['orderId'] ?? '';
@@ -12,8 +13,7 @@ if (!$userId) {
 }
 
 if (!$orderId) {
-    $_SESSION['flash_payment_error'] = 'ORDER_NOT_FOUND';
-    header('Location: order_making.php');
+    header('Location: my_orders.php');
     exit();
 }
 
@@ -42,12 +42,35 @@ try {
 
     // Заказ есть, но не оплачен
     if ($order['status'] !== 'paid') {
-        throw new Exception('PAYMENT_NOT_FOUND');
+        $paymentStatus = checkYooKassaStatus($orderId);
+        switch ($paymentStatus) {
+            case 'succeeded':
+                // Деньги списались, но вебхук не сработал
+                updateOrderStatus($orderId, 'paid');
+                $order['status'] = 'paid'; // Обновляем локально
+                break;
+                
+            case 'pending':
+                // Ожидание оплаты
+                throw new Exception('PAYMENT_PENDING');
+                
+            case 'canceled':
+                // Оплата отменена
+                throw new Exception('PAYMENT_CANCELED');
+                
+            case 'failed':
+                // Ошибка оплаты
+                throw new Exception('PAYMENT_FAILED');
+                
+            default:
+                // Неизвестный статус или ошибка API
+                throw new Exception('PAYMENT_STATUS_UNKNOWN');
+        }
     }
 
 } catch (Exception $e) {
     $_SESSION['flash_payment_error'] = $e->getMessage();
-    header('Location: order_making.php');
+    header('Location: my_orders.php');
     exit();
 } finally {
     // Закрываем все соединения в finally (выполнится в любом случае)
@@ -86,10 +109,10 @@ require_once __DIR__ . '/src/getOrderData.php';
                 </div>
                 <div class="order_success_back">
                     <div class="order_success_title">
-                        Заказ успешно оформлен!
+                        Заказ успешно оформлен и оплачен!
                     </div>
                     <div class="order_success_row">
-                        Номер вашего заказа: <?= '#' . str_pad($orderId, 6, '0', STR_PAD_LEFT) ?>
+                        Номер заказа: <?= '#' . str_pad($orderId, 6, '0', STR_PAD_LEFT) ?>
                     </div>
                     <div class="order_right_row_gap"></div>
                     <?php

@@ -69,6 +69,13 @@ if (!isset($_SESSION['user']['id'])) {
                 if (isset($stmt)) $stmt->close();
                 if (isset($connect)) $connect->close();
             }
+            
+            // тут доделать или перенести чтобы статусы можно было отображать 
+            // $orderStatus = match($order['status']) {
+            //     'cart' => 'корзина',
+            //     'paid' => 'оплачен',
+            //     'pending_payment' => 'ожидает оплаты',
+            // };
             ?>
             <main class="main">
                 <div class="button_return_position">
@@ -94,6 +101,32 @@ if (!isset($_SESSION['user']['id'])) {
                     foreach ($ordersInfo as $order) {
                 ?>
                     <h3>Заказ #<?= $order['order_id'] ?></h3>
+
+                    <!-- тут показывать соответствующие кнопки действий -->
+                    <?php 
+                    // Проверяем наличие КОНКРЕТНОГО кода ошибки оплаты
+                    if (isset($_SESSION['flash_payment_error'])) { 
+                        // Преобразуем код в текст прямо на месте
+                        $errorText = match($_SESSION['flash_payment_error']) {
+                            'PAYMENT_CANCELED' => 'Оплата отменена. Попробуйте еще раз',
+                            'PAYMENT_FAILED' => 'Оплата не прошла. Попробуйте еще раз или выберите другой способ',
+                            'ORDER_NOT_FOUND' => 'Заказ не найден. Попробуйте создать заказ заново',
+                            'PAYMENT_PENDING' => 'Оплата обрабатывается. Подождите несколько минут',
+                            'PAYMENT_STATUS_UNKNOWN' => 'Статус оплаты неизвестен. Подождите или проверьте позже',
+                            'DATABASE_CONNECT_FAILED' => 'Временные технические неполадки. Попробуйте позже',
+                            'DATABASE_OPERATIONS_FAILED ' => 'Ошибка обработки заказа. Попробуйте позже',
+                            default => 'Произошла ошибка при оплате. Пожалуйста, попробуйте оплатить еще раз.'
+                        };
+                    ?>
+                        <div class="error_pay_no_address open" id="flash-payment-error">
+                            <img class="error_modal_icon" src="img/error_modal_icon.png">
+                            <?= htmlspecialchars($errorText) ?>
+                        </div>
+                    <?php 
+                        // Удаляем ошибку после показа
+                        unset($_SESSION['flash_payment_error']);
+                    } 
+                    ?>
                 <?php
                     }
                 }

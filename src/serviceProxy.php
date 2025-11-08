@@ -1,6 +1,15 @@
 <?php
-require_once '../config/config.php';
+// Подключаем загрузчик .env
+require_once __DIR__ . '/loader.php';
 
 header('Content-Type: application/json');
-echo json_encode(['key' => DADATA_API_KEY]);
+
+// Получаем ключ из .env
+$dadataKey = getenv('DADATA_API_KEY');
+
+// Отдаем ключ клиенту
+echo json_encode([
+    'key' => $dadataKey,
+    'status' => 'success'
+]);
 ?>

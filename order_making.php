@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/src/envLoader.php';
 
 // ПРОВЕРКА АВТОРИЗАЦИИ - ЕСЛИ НЕ АВТОРИЗОВАН, ПЕРЕНАПРАВЛЯЕМ НА ГЛАВНУЮ
 if (!isset($_SESSION['user']['id'])) {
@@ -22,7 +22,7 @@ if ($cartCount === 0) {
     <title>Интернет-магазин "Boss Of This Gym"</title>
     <link rel="stylesheet" href="styles.css">
     <script defer src="https://cdn.jsdelivr.net/npm/@dadata/suggestions@25.4.1/dist/suggestions.min.js"></script>
-    <script src="https://api-maps.yandex.ru/2.1/?apikey=<?= YANDEX_MAPS_KEY ?>&lang=ru_RU&load=package.full"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=<?= getenv('YANDEX_MAPS_KEY') ?>&lang=ru_RU&load=package.full"></script>
 </head>
 <body class="body">
     <div class="loader-overlay" id="loader">
@@ -131,29 +131,6 @@ if ($cartCount === 0) {
                             <img class="error_modal_icon" src="img/error_modal_icon.png">
                             Укажите адрес доставки
                         </div>
-                        <?php 
-                        // Проверяем наличие КОНКРЕТНОГО кода ошибки оплаты
-                        if (isset($_SESSION['flash_payment_error'])) { 
-                            // Преобразуем код в текст прямо на месте
-                            $errorText = match($_SESSION['flash_payment_error']) {
-                                'ORDER_NOT_FOUND' => 'Заказ не найден. Пожалуйста, попробуйте еще раз.',
-                                'DATABASE_CONNECT_FAILED' => 'Ошибка базы данных. Пожалуйста, попробуйте еще раз.',
-                                'DATABASE_OPERATIONS_FAILED' => 'Ошибка базы данных. Пожалуйста, попробуйте еще раз.',
-                                'PAYMENT_NOT_FOUND' => 'Оплата не найдена в базе данных. Пожалуйста, попробуйте еще раз.',
-                                'PAYMENT_FAILED' => 'Оплата не прошла. Попробуйте другой способ оплаты или проверьте данные карты.',
-                                'PAYMENT_CANCELED' => 'Оплата отменена. Вы можете попробовать снова.',
-                                default => 'Произошла ошибка при оплате. Пожалуйста, попробуйте еще раз.'
-                            };
-                        ?>
-                            <div class="error_pay_no_address open" id="flash-payment-error">
-                                <img class="error_modal_icon" src="img/error_modal_icon.png">
-                                <?= htmlspecialchars($errorText) ?>
-                            </div>
-                        <?php 
-                            // Удаляем ошибку после показа
-                            // unset($_SESSION['flash_payment_error']);
-                        } 
-                        ?>
                     </div>
                 </div>
             </div>
@@ -198,29 +175,6 @@ if ($cartCount === 0) {
                             <img class="error_modal_icon" src="img/error_modal_icon.png">
                             Укажите магазин для самовывоза
                         </div>
-                        <?php 
-                        // Проверяем наличие КОНКРЕТНОГО кода ошибки оплаты
-                        if (isset($_SESSION['flash_payment_error'])) { 
-                            // Преобразуем код в текст прямо на месте
-                            $errorText = match($_SESSION['flash_payment_error']) {
-                                'ORDER_NOT_FOUND' => 'Заказ не найден. Пожалуйста, попробуйте еще раз.',
-                                'DATABASE_CONNECT_FAILED' => 'Ошибка базы данных. Пожалуйста, попробуйте еще раз.',
-                                'DATABASE_OPERATIONS_FAILED' => 'Ошибка базы данных. Пожалуйста, попробуйте еще раз.',
-                                'PAYMENT_NOT_FOUND' => 'Оплата не найдена в базе данных. Пожалуйста, попробуйте еще раз.',
-                                'PAYMENT_FAILED' => 'Оплата не прошла. Попробуйте другой способ оплаты или проверьте данные карты.',
-                                'PAYMENT_CANCELED' => 'Оплата отменена. Вы можете попробовать снова.',
-                                default => 'Произошла ошибка при оплате. Пожалуйста, попробуйте еще раз.'
-                            };
-                        ?>
-                            <div class="error_pay_no_address open" id="flash-payment-error">
-                                <img class="error_modal_icon" src="img/error_modal_icon.png">
-                                <?= htmlspecialchars($errorText) ?>
-                            </div>
-                        <?php 
-                            // Удаляем ошибку после показа
-                            unset($_SESSION['flash_payment_error']);
-                        } 
-                        ?>
                     </div>
                 </div>
             </div>

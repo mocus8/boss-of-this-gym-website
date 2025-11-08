@@ -19,11 +19,23 @@ try {
         throw new Exception('DATABASE_CONNECT_FAILED');
     }
 
+    $connect->begin_transaction();
+
     $stmt = $connect->prepare("
-        SELECT o.order_id, o.total_price, o.status 
-        FROM orders o 
-        WHERE o.order_id = ? AND o.user_id = ? AND o.status IN ('cart', 'pending_payment')
-        AND EXISTS (SELECT 1 FROM product_order po WHERE po.order_id = o.order_id)
+        SELECT o.order_id, o.total_price, o.status,
+        o.created_at,
+        (SELECT COUNT(*) 
+        FROM orders o2 
+        WHERE o2.user_id = o.user_id 
+        AND o2.status = 'pending_payment'
+        AND o2.created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+        ) as user_recent_orders
+    FROM orders o 
+    WHERE o.order_id = ? AND o.user_id = ? 
+    AND o.status IN ('cart', 'pending_payment')
+    AND EXISTS (SELECT 1 FROM product_order po WHERE po.order_id = o.order_id)
+    HAVING user_recent_orders < 10
+    FOR UPDATE
     ");
     if (!$stmt) {
         throw new Exception('DATABASE_OPERATIONS_FAILED');
@@ -46,8 +58,9 @@ try {
     }
 
     $yookassa = new \YooKassa\Client();
-    $yookassa->setAuth('1203395', 'test_NxHr2T8jZ4wWKMuegRsBSsWwSyYUwsSJUnCgIBr9HZU');
+    $yookassa->setAuth(getenv('YOOKASSA_SHOP_ID'), getenv('YOOKASSA_API_KEY'));
     
+    $idempotenceKey = 'order_' . $orderId . '_' . time();
     $payment = $yookassa->createPayment([
         'amount' => [
             'value' => $order['total_price'],
@@ -55,12 +68,14 @@ try {
         ],
         'confirmation' => [
             'type' => 'redirect',
-            'return_url' => 'https://cw187549.tw1.ru/my_orders.php?orderId=' . $orderId
+            'return_url' => 'https://cw187549.tw1.ru/order_success.php?orderId=' . $orderId
         ],
         'capture' => true,
         'description' => 'Заказ №' . $orderId,
         'metadata' => ['orderId' => $orderId]
-    ], uniqid('', true));
+    ], $idempotenceKey);
+
+    $connect->commit();
 
     echo json_encode([
         'confirmation_url' => $payment->getConfirmation()->getConfirmationUrl()
@@ -69,6 +84,10 @@ try {
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
+    
+    if (isset($connect)) {
+        $connect->rollback();
+    }
 } finally {
     if (isset($stmt)) $stmt->close();
     if (isset($connect)) $connect->close();

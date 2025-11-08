@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/src/envLoader.php';
 ?>
 <!DOCTYPE html>
 <html>
@@ -101,7 +101,7 @@ require_once __DIR__ . '/config/config.php';
         </div>
         <script src="js/loader.js"></script>
         <script defer src="js/modals.js"></script>
-        <script src="https://api-maps.yandex.ru/2.1/?apikey=<?= YANDEX_MAPS_KEY ?>&lang=ru_RU"></script>
+        <script src="https://api-maps.yandex.ru/2.1/?apikey=<?= getenv('YANDEX_MAPS_KEY') ?>&lang=ru_RU"></script>
         <script defer src="js/maps.js"></script>
 	</body>
 </html>
