@@ -160,7 +160,7 @@ require_once __DIR__ . '/src/getOrderData.php';
                         Адрес доставки: <?= htmlspecialchars($orderDetails['delivery_address']) ?>
                     </div>
                     <div class="order_success_row">
-                        Заказ будет доставлен с <?= date('d.m.Y', strtotime($paidAt . ' +1 day')) ?> до <?= date('d.m.Y', strtotime($paidAt . ' +2 days')) ?>
+                        Ориентировочная дата доставки: с <?= date('d.m.Y', strtotime($paidAt . ' +1 day')) ?> до <?= date('d.m.Y', strtotime($paidAt . ' +2 days')) ?>
                     </div>
                     <div class="order_success_row">
                         Курьер свяжеться с вами по телефону
