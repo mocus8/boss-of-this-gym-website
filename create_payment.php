@@ -25,7 +25,7 @@ try {
 
     $stmt = $connect->prepare("
         SELECT o.order_id, o.total_price, o.status, o.created_at,
-        u.phone,
+        u.login,
         (SELECT COUNT(*) 
         FROM orders o2 
         WHERE o2.user_id = o.user_id 
@@ -36,7 +36,7 @@ try {
     INNER JOIN users u ON o.user_id = u.id
     WHERE o.order_id = ? AND o.user_id = ? 
     AND o.status IN ('cart', 'pending_payment')
-    AND u.phone IS NOT NULL
+    AND u.login IS NOT NULL
     AND EXISTS (SELECT 1 FROM product_order po WHERE po.order_id = o.order_id)
     HAVING user_recent_orders < 10
     FOR UPDATE
@@ -54,7 +54,7 @@ try {
         throw new Exception('ORDER_NOT_FOUND');
     }
 
-    if (empty($order['phone'])) {
+    if (empty($order['login'])) {
         throw new Exception('EMPTY_USER_PHONE');
     }
 
@@ -103,7 +103,7 @@ try {
         // тут поменять на правильную инфу
         'receipt' => [
             'customer' => [
-                'phone' => $order['phone']
+                'phone' => $order['login']
             ],
             'items' => $items
         ]
