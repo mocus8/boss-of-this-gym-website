@@ -56,7 +56,11 @@ document.querySelectorAll('[data-action="pay"]').forEach(button => {
                 throw new Error(result.error || 'Payment error');
             }
         } catch (error) {
-            error_log('Full error:', error);
+            this.disabled = false;
+            this.textContent = originalText;
+            
+            const errorText = getErrorMessage(error.message);
+            alert(errorText);
         }
     });
 });
