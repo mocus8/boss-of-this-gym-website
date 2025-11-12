@@ -81,7 +81,7 @@ try {
     }
 
 } catch (Exception $e) {
-    $_SESSION['flash_payment_error'] = $e->getMessage();
+    $_SESSION['flash_payment_error'][$orderId] = $e->getMessage();
     header('Location: my_orders.php');
     exit();
 } finally {
@@ -141,31 +141,36 @@ require_once __DIR__ . '/src/getOrderData.php';
                         Итоговая стоимость: <?= $orderTotalPrice ?> ₽
                     </div>
                     <div class="order_right_row_gap"></div>
-                    <!-- выбранный способ и адрес доставки -->
                     <div class="order_success_row">
                         Способ доставки: <?= $orderDetails['delivery_type'] === 'pickup' ? 'самовывоз' : 'доставка' ?>
                     </div>
-                    <?php if ($orderDetails['delivery_type'] === 'pickup' && $orderDetails['store_name']) { ?>  
-                    <div class="order_success_row">
-                        Пункт выдачи: <?= htmlspecialchars($orderDetails['store_name']) ?>, <?= htmlspecialchars($orderDetails['store_address']) ?>
-                    </div>
-                    <div class="order_success_row">
-                        Заказ может быть готов к получению с <?= date('H:i', strtotime($paidAt . ' +1 hour')) ?> до <?= date('H:i', strtotime($paidAt . ' +3 hour')) ?>, для уточнения звоните менеджеру 
-                        <a href='tel: <?= htmlspecialchars($orderDetails['phone']) ?>' class="colour_href">
-                            <?= htmlspecialchars($orderDetails['phone']) ?>
-                        </a>
-                    </div>
-                    <?php } else if ($orderDetails['delivery_type'] === 'delivery' && $orderDetails['delivery_address']) { ?>
-                    <div class="order_success_row">
-                        Адрес доставки: <?= htmlspecialchars($orderDetails['delivery_address']) ?>
-                    </div>
-                    <div class="order_success_row">
-                        Ориентировочная дата доставки: с <?= date('d.m.Y', strtotime($paidAt . ' +1 day')) ?> до <?= date('d.m.Y', strtotime($paidAt . ' +2 days')) ?>
-                    </div>
-                    <div class="order_success_row">
-                        Курьер свяжеться с вами по телефону
-                    </div>
-                    <?php } ?>
+                    <?php
+                    if ($orderDetails['delivery_type'] === 'pickup' && $orderDetails['store_name']) { 
+                    ?>  
+                        <div class="order_success_row">
+                            Пункт выдачи: <?= htmlspecialchars($orderDetails['store_name']) ?>, <?= htmlspecialchars($orderDetails['store_address']) ?>
+                        </div>
+                        <div class="order_success_row">
+                            Заказ может быть готов к получению с <?= date('H:i', strtotime($paidAt . ' +1 hour')) ?> до <?= date('H:i', strtotime($paidAt . ' +3 hour')) ?>, для уточнения звоните менеджеру 
+                            <a href='tel: <?= htmlspecialchars($orderDetails['phone']) ?>' class="colour_href">
+                                <?= htmlspecialchars($orderDetails['phone']) ?>
+                            </a>
+                        </div>
+                    <?php
+                    } else if ($orderDetails['delivery_type'] === 'delivery' && $orderDetails['delivery_address']) { 
+                    ?>
+                        <div class="order_success_row">
+                            Адрес доставки: <?= htmlspecialchars($orderDetails['delivery_address']) ?>
+                        </div>
+                        <div class="order_success_row">
+                            Ориентировочная дата доставки: с <?= date('d.m.Y', strtotime($paidAt . ' +1 day')) ?> до <?= date('d.m.Y', strtotime($paidAt . ' +2 days')) ?>
+                        </div>
+                        <div class="order_success_row">
+                            Курьер свяжеться с вами по телефону
+                        </div>
+                    <?php
+                    } 
+                    ?>
                     <div class="order_right_row_gap"></div>
                     <div class="order_success_row">
                         Письмо с чеком будет отправлено на вашу почту

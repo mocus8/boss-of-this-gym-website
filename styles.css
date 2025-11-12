@@ -1251,16 +1251,17 @@ button {
 .cart_empty {
     position: relative;
     margin-top: 12.5%;
-    margin-left: 40%;
-    width: 17.25vw;
+    margin-left: auto;
+    margin-right: auto;
+    width: max-content;
     height: 4.75vw;
     background-image: url("./img/contacts_back.svg");
     background-repeat: no-repeat;
     background-size: 100% 100%;
+    padding: 0.5% 4% 0.5% 4%;
     font-size: 2.5vw;
     font-family: "Jost", Arial;
-    padding-top: 0.5%;
-    padding-left: 4%;
+    white-space: nowrap;
 }
 
 .cart_in_cart_text {
@@ -2178,23 +2179,98 @@ button {
 
 .orders_list {
     position: relative;
-    margin-top: 5vw;
-    margin-left: 5vw;
+    margin-top: 6vw;
+    margin-left: 6vw;
     margin-right: 5vw;
     width: 90vw;
     height: min-content;
-
-
-
-    background-color: aqua;
 }
 
 .order {
     position: relative;
-    margin-top: 1vw;
+    margin-bottom: 1vw;
+    border-radius: 0.75vw;
+    background-color: #BD1B1B;
     display: flex;
     flex-direction: row;
-    font-size: 1.75vw;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2.5vw;
+    padding: 2.5vw 2vw 1.5vw 0.5vw;
+    white-space: nowrap;
+    font-size: 1.5vw;
     font-family: "Jost", Arial;
-    /* background-color: #BD1B1B; */
+}
+
+.order_number {
+    position: absolute;
+    top: 0.25vw;
+    left: 0.5vw;
+    font-size: 1.75vw;
+}
+
+.order_data_address {
+    white-space: wrap;
+    max-width: 20vw;
+}
+
+.order_button {
+    padding: 0.5vw 1vw 0.5vw 1vw;
+    border: 0.15vw solid black;
+    border-radius: 0.5vw;
+    background-color: #4B4B4B;
+    text-align: center;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.order_button:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0.2vw 0.2vw 0.4vw rgba(0, 0, 0, 0.5));
+    cursor: pointer;
+}
+
+.order_button:active {
+    transform: scale(1);
+    filter: drop-shadow(0.2vw 0.2vw 0.4vw rgba(0, 0, 0, 0.5));
+}
+
+.order_error {
+    position: absolute;
+    width: min-content;
+    top: 3.5%;
+    right: 3%;
+    height: 2.5vw;
+    background-color: white;
+    border-radius: 0.25vw;
+    border: 0.025vw solid black;
+    padding-right: 0.75vw;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5vw;
+    white-space: nowrap;
+    font-family: "Kolibri Light", "Kolibri-Light", "Kolibri", sans-serif;
+    font-size: 0.9vw;
+    font-weight: 100;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity .4s, visibility .4s;
+}
+
+.order_error.open {
+    visibility: visible;
+    opacity: 1;
+}
+
+.order_refund_info {
+    position: relative;
+    margin-bottom: 1vw;
+    border-radius: 0.5vw;
+    background-color: #BD1B1B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1vw 0.5vw 1vw 0.5vw;
+    font-size: 1.25vw;
+    font-family: "Jost", Arial;
 }

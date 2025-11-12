@@ -25,7 +25,8 @@ if (!isset($_SESSION['user']['id'])) {
             <?php 
             require_once __DIR__ . '/header.php'; 
 
-            //тут в нормальной версии нужно обрабатывать ошибку при подключении и далее, и логировать ее как положено вместе с остальными
+            // тут в нормальной версии нужно обрабатывать ошибку при подключении и далее,
+            // и логировать ее как положено вместе с остальными
             try {
                 $connect = getDB();
                 if (!$connect || $connect->connect_error) {
@@ -69,14 +70,6 @@ if (!isset($_SESSION['user']['id'])) {
                 if (isset($stmt)) $stmt->close();
                 if (isset($connect)) $connect->close();
             }
-            
-            // тут доделать или перенести чтобы статусы можно было отображать 
-            // $orderStatus = match($order['status']) {
-            //     'cart' => 'корзина',
-            //     'paid' => 'оплачен',
-            //     'pending_payment' => 'ожидает оплаты',
-            //     'refund' => 'возврат',
-            // };
             ?>
             <main class="main">
                 <div class="button_return_position">
@@ -96,19 +89,75 @@ if (!isset($_SESSION['user']['id'])) {
                     <?php
                     if (empty($ordersInfo)) {
                     ?>
-                        У вас еще нет заказов
+                        <div class="cart_empty">
+                            У вас еще нет заказов
+                        </div>
                     <?php
                     } else {
                         foreach ($ordersInfo as $order) {
                     ?>
                             <div class="order">
-                                Заказ <?= '#' . str_pad($order['order_id'], 6, '0', STR_PAD_LEFT) ?>
-                                <!-- тут показывать соответствующие кнопки действий -->
+                                <div class="order_number">
+                                    Заказ <?= '#' . str_pad($order['order_id'], 6, '0', STR_PAD_LEFT) ?>
+                                </div>
+                                <div class="order_data">
+                                    Стоимость: <?= $order['total_price'] ?> ₽
+                                </div>
+                                <div class="order_data">
+                                    Способ получения: <br>
+                                    <?= $order['delivery_type'] === 'pickup' ? 'самовывоз' : 'доставка' ?>
+                                </div>
+                                <?php
+                                if ($order['delivery_type'] === 'pickup' && $order['store_address']) { 
+                                ?>  
+                                    <div class="order_data_address">
+                                        Пункт выдачи: <?= $order['store_address'] ?>
+                                    </div>
+                                <?php
+                                } else if ($order['delivery_type'] === 'delivery' && $order['delivery_address']) { 
+                                ?>
+                                    <div class="order_data_address">
+                                        Адрес доставки: <?= $order['delivery_address'] ?>
+                                    </div>
+                                <?php
+                                } 
+                                ?>
+                                <div class="order_data">
+                                    Статус заказа: <br>
+                                    <?= match($order['status']) {
+                                        'cart' => 'корзина',
+                                        'paid' => 'оплачен', 
+                                        'pending_payment' => 'ожидает оплаты',
+                                        'cancelled' => 'отменён',
+                                        'refund' => 'возврат',
+                                        default => $order['status']
+                                    } ?> 
+                                </div>
+                                <?php
+                                if ($order['status'] === 'paid') {
+                                ?>
+                                     <a href="order_success.php?orderId=<?= $order['order_id'] ?>">
+                                        <div class="order_button">
+                                            детали заказа
+                                        </div>
+                                    </a>
+                                <?php
+                                } else if ($order['status'] === 'pending_payment') {
+                                ?>
+                                    <div class="order_button" data-action="pay" data-order-id="<?= $order['order_id'] ?>">
+                                        Оплатить
+                                    </div>
+                                    <div class="order_button" data-action="cancel" data-order-id="<?= $order['order_id'] ?>">
+                                        Отменить
+                                    </div>
+                                <?php
+                                }
+                                ?>
                                 <?php 
                                 // Проверяем наличие КОНКРЕТНОГО кода ошибки оплаты
-                                if (isset($_SESSION['flash_payment_error'])) { 
+                                if (isset($_SESSION['flash_payment_error']) && isset($_SESSION['flash_payment_error'][$order['order_id']])) { 
                                     // Преобразуем код в текст прямо на месте
-                                    $errorText = match($_SESSION['flash_payment_error']) {
+                                    $paymentErrorText = match($_SESSION['flash_payment_error'][$order['order_id']]) {
                                         'PAYMENT_CANCELED' => 'Оплата отменена. Попробуйте еще раз',
                                         'PAYMENT_FAILED' => 'Оплата не прошла. Попробуйте еще раз или выберите другой способ',
                                         'ORDER_NOT_FOUND' => 'Заказ не найден. Попробуйте создать заказ заново',
@@ -116,29 +165,91 @@ if (!isset($_SESSION['user']['id'])) {
                                         'EMPTY_USER_PHONE' => 'Заказ не найден. Попробуйте создать заказ заново',
                                         'PAYMENT_STATUS_UNKNOWN' => 'Статус оплаты неизвестен. Подождите или проверьте позже',
                                         'DATABASE_CONNECT_FAILED' => 'Временные технические неполадки. Попробуйте позже',
-                                        'DATABASE_OPERATIONS_FAILED ' => 'Ошибка обработки заказа. Попробуйте позже',
+                                        'DATABASE_OPERATIONS_FAILED' => 'Ошибка обработки заказа. Попробуйте позже',
                                         default => 'Произошла ошибка при оплате. Пожалуйста, попробуйте оплатить еще раз.'
                                     };
                                 ?>
-                                    <div class="error_pay_no_address open" id="flash-payment-error">
+                                    <div class="order_error open" id="flash-payment-error">
                                         <img class="error_modal_icon" src="img/error_modal_icon.png">
-                                        <?= htmlspecialchars($errorText) ?>
+                                        <?= htmlspecialchars($paymentErrorText) ?>
                                     </div>
                                 <?php 
                                     // Удаляем ошибку после показа
-                                    unset($_SESSION['flash_payment_error']);
-                                } 
+                                    unset($_SESSION['flash_payment_error'][$order['order_id']]);
+                                }
+                                
+                                if (isset($_SESSION['flash_cancel_error']) && isset($_SESSION['flash_cancel_error'][$order['order_id']])) {
+                                    // Преобразуем код в текст прямо на месте
+                                    $cancelErrorText = match($_SESSION['flash_payment_error'][$order['order_id']]) {
+                                        'DATABASE_OPERATIONS_FAILED' => 'Ошибка отмены заказа. Попробуйте позже',
+                                        'DATABASE_CONNECT_FAILED' => 'Временные технические неполадки. Попробуйте позже',
+                                        'ORDER_CANNOT_BE_CANCELLED' => 'Заказ не найден. Попробуйте позже или обновите страницу',
+                                        default => 'Произошла ошибка при отмене заказа. Пожалуйста, попробуйте отменить еще раз.'
+                                    };
+                                ?>
+                                    <div class="order_error open" id="flash-payment-error">
+                                        <img class="error_modal_icon" src="img/error_modal_icon.png">
+                                        <?= htmlspecialchars($cancelErrorText) ?>
+                                    </div>
+                                <?php 
+                                    // Удаляем ошибку после показа
+                                    unset($_SESSION['flash_cancel_error'][$order['order_id']]);
+                                }
+
+                                if (isset($_SESSION['flash_cancel_success']) && isset($_SESSION['flash_cancel_success'][$order['order_id']])) {
+                                ?>
+                                    <div class="order_error open" id="flash-payment-error">
+                                        <img class="error_modal_icon" src="img/error_modal_icon.png">
+                                        Заказ успешно отменен
+                                    </div>
+                                <?php 
+                                    // Удаляем ошибку после показа
+                                    unset($_SESSION['flash_cancel_success'][$order['order_id']]);
+                                }
                                 ?>
                             </div>
                     <?php
                         }
+                        if (isset($_SESSION['flash_payment_error']) && empty($_SESSION['flash_payment_error'])) {
+                            unset($_SESSION['flash_payment_error']);
+                        }
+                        if (isset($_SESSION['flash_cancel_error']) && empty($_SESSION['flash_cancel_error'])) {
+                            unset($_SESSION['flash_cancel_error']);
+                        }
+                        if (isset($_SESSION['flash_cancel_success']) && empty($_SESSION['flash_cancel_success'])) {
+                            unset($_SESSION['flash_cancel_success']);
+                        }
                     }
                     ?>
+                    <div class="order_refund_info">
+                        Для возврата заказа свяжитесь с менеджером (<a href='tel: +74954042791' class="colour_href">+7 495 404 27 91</a>). Вернуть получится только заказы с момента получения которых прошло менее 14 дней
+                    </div>
                 </div>
             </main>
             <?php require_once __DIR__ . '/footer.php';?>
         </div>
+        <div class="registration_modal_blur" id="order-cancel-modal">
+            <div class="account_delete_modal">
+                <div class="account_delete_modal_entry_text">
+                    Вы уверены что хотите отменить заказ?
+                </div>
+                <div class="registration_modal_form">
+                    <div class="registration_modal_buttons">
+                        <button class="registration_modal_button" type="button" id="close-order-cancel-modal">
+                            Вернуться
+                        </button>
+                        <form method="POST" action="/src/cancelOrder.php" id="cancel-order-form" class="registration_modal_button">
+                            <input type="hidden" name="order_id" id="cancel-order-id">
+                            <button type="submit">
+                                Отменить заказ
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <script src="js/loader.js"></script>
         <script defer src="js/modals.js"></script>
+        <script defer src="js/my_orders.js"></script>
 	</body>
 </html>
