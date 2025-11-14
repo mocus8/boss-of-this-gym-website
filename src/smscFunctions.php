@@ -17,7 +17,7 @@ function send_sms_verification($phone) {
     // Текст сообщения
     $message = "Код подтверждения: $code";
     $testMode = (SMSC_TEST_MODE === 'true');
-    $query = $testMode ? "cost=3" : "cost=1";
+    $query = $testMode ? "cost=3" : "";
     
     // Отправка через SDK
     list($smsId, $smsCount, $cost, $balance) = send_sms(
