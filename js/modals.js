@@ -158,9 +158,11 @@ document.getElementById('sms-code').addEventListener('click', async function(e) 
                 })
             });
         
-        if (!response.ok) {
-            throw new Error(`Ошибка ${response.status}! Попробуйте еще раз`);
-        }
+            const result = await response.json();
+    
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || result.message || `Ошибка ${response.status}!`);
+            }
 
         this.textContent = 'Успешно';
         }
