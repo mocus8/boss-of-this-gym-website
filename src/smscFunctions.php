@@ -28,10 +28,11 @@ function send_sms_verification($phone) {
         return [
             'success' => true,
             'test_mode' => $testMode,
-            'debug_code' => $code // Для тестов
+            'debug_code' => $code // Для тестов, потом убрать!!!
         ];
     } else {
         error_log("SMSC Error: $smsId for phone $phone");
+        unset($_SESSION['sms_verification']);
         return [
             'success' => false,
             'error' => 'Ошибка отправки SMS'

@@ -141,13 +141,21 @@ document.getElementById('sms-code').addEventListener('click', async function(e) 
                     phone: phoneValidation.formatted
                 })
             });
-        
-        if (!response.ok) {
-            throw new Error(`Ошибка ${response.status}! Попробуйте еще раз`);
-        }
 
-        this.disabled = false;
-        this.textContent = 'Подтвердить код';
+
+            
+            //это для дебага!!!
+            const result = await response.json();
+            alert(`DEBUG: Код подтверждения: ${result.debug_code}`);
+        
+
+
+            if (!response.ok) {
+                throw new Error(`Ошибка ${response.status}! Попробуйте еще раз`);
+            }
+
+            this.disabled = false;
+            this.textContent = 'Подтвердить код';
         } else if (this.textContent.includes('Подтвердить')) {
             this.disabled = true;
             this.textContent = 'Обработка...';
