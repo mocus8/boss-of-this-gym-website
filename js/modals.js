@@ -138,7 +138,7 @@ document.getElementById('sms-code').addEventListener('click', async function(e) 
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    phone: phoneValidation
+                    phone: phoneValidation.formatted
                 })
             });
         
