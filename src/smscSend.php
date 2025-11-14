@@ -4,7 +4,8 @@ require_once __DIR__ . '/smscFunctions.php';
 
 header('Content-Type: application/json');
 
-$phone = $_POST['phone'] ?? '';
+$input = json_decode(file_get_contents('php://input'), true);
+$phone = $input['phone'] ?? '';
 
 if (empty($phone)) {
     echo json_encode(['success' => false, 'error' => 'Введите номер телефона']);
