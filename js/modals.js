@@ -161,7 +161,7 @@ document.getElementById('sms-code').addEventListener('click', async function(e) 
             this.textContent = 'Обработка...';
 
             //это для дебага, потом убрать!!!
-            console.log("smsCodeInput");
+            file_put_contents('debug.txt', smsCodeInput, FILE_APPEND);
 
             // передаем код В POST для проверки
             const response = await fetch('/src/smscVerify.php', {
