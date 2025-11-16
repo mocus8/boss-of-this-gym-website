@@ -181,7 +181,7 @@ if ($idUser != '') {
             <div class="registration_modal_entry_text">
                 Регистрация
             </div>
-            <form class="registration_modal_form" action="src/registration.php" method="post">
+            <form class="registration_modal_form" action="src/registration.php" method="post" data-recaptcha-site-key="<?= getenv('GOOGLE_RECAPTCHA_SITE_KEY') ?>>
                 <div class="registration_modal_input_back">
                     <span class="registration_modal_input_text">
                         Ваше имя и фамилия:

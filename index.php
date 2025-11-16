@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/src/helpers.php';
+require_once __DIR__ . '/src/envLoader.php';
 
 // Настройки кэширования
 $cacheFile = __DIR__ . '/cache/categories_products.cache';
@@ -134,5 +135,6 @@ if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
         </div>
         <script src="js/loader.js"></script>
         <script defer src="js/modals.js"></script>
+        <script defer src="https://www.google.com/recaptcha/api.js?render=<?= getenv('GOOGLE_RECAPTCHA_SITE_KEY') ?>"></script>
 	</body>
 </html>

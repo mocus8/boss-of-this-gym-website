@@ -90,6 +90,13 @@ function FormValidatePhoneNumber(formClass) {
 FormValidatePhoneNumber('.authorization_modal_form');
 FormValidatePhoneNumber('.registration_modal_form');
 
+//получение токена капчи
+async function getRecaptchaToken(form) {
+    const siteKey = form.dataset.recaptchaSiteKey;
+    await grecaptcha.ready;
+    return await grecaptcha.execute(siteKey, {action: 'submit'});
+}
+
 document.querySelector('.authorization_modal_form').addEventListener('submit', function(e) {
     //предотвращаем стандартную отправку формы
     e.preventDefault();
@@ -190,6 +197,7 @@ document.getElementById('sms-code').addEventListener('click', async function(e) 
 document.querySelector('.registration_modal_form').addEventListener('submit', async function(e) {
     e.preventDefault();
 
+    const token = await getRecaptchaToken(this);
     const phoneNumberInput = this.querySelector('input[name="login"]');
     const phoneValidation = validatePhoneNumber(phoneNumberInput.value);
     const password = this.querySelector('input[name="password"]').value;
@@ -211,6 +219,7 @@ document.querySelector('.registration_modal_form').addEventListener('submit', as
 
     // Этот код выполнится ТОЛЬКО если проверки прошли
     const formData = new FormData(this);
+    formData.append('recaptcha_response', token);
 
     const result = await fetchWithRetry(this.action, {
         method: 'POST',

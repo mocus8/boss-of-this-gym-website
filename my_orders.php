@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/src/envLoader.php';
 
 // ПРОВЕРКА АВТОРИЗАЦИИ - ЕСЛИ НЕ АВТОРИЗОВАН, ПЕРЕНАПРАВЛЯЕМ НА ГЛАВНУЮ
 if (!isset($_SESSION['user']['id'])) {
@@ -251,5 +252,6 @@ if (!isset($_SESSION['user']['id'])) {
         <script src="js/loader.js"></script>
         <script defer src="js/modals.js"></script>
         <script defer src="js/my_orders.js"></script>
+        <script defer src="https://www.google.com/recaptcha/api.js?render=<?= getenv('GOOGLE_RECAPTCHA_SITE_KEY') ?>"></script>
 	</body>
 </html>

@@ -1,4 +1,7 @@
-<?php session_start(); ?>
+<?php 
+session_start();
+require_once __DIR__ . '/src/envLoader.php';
+?>
 
 <!DOCTYPE html>
 <html>
@@ -124,5 +127,6 @@
         <script src="js/loader.js"></script>
         <script defer type="module" src="js/cart.js"></script>
         <script defer src="js/modals.js"></script>
+        <script defer src="https://www.google.com/recaptcha/api.js?render=<?= getenv('GOOGLE_RECAPTCHA_SITE_KEY') ?>"></script>
 	</body>
 </html>
