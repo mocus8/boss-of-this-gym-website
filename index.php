@@ -82,7 +82,6 @@ if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
 <!DOCTYPE html>
 <html>
 	<head>
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gtmpx.com 'unsafe-eval'">
 		<meta charset="utf-8">
 		<title>
             Интернет-магазин "Boss Of This Gym"
