@@ -2359,3 +2359,10 @@ button {
     font-size: 1.25vw;
     font-family: "Jost", Arial;
 }
+
+/* Скрыть бадж reCAPTCHA */
+.grecaptcha-badge {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
