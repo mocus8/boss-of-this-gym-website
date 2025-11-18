@@ -38,8 +38,8 @@ require_once __DIR__ . '/src/envLoader.php';
                             Телефон:
                         </div>
                         <div class="contact_inf">
-                            <a href='tel: +74954042791' class="colour_href">+7 495 404 27 91</a> - по вопросам заказов и работе магазинов<br>
-                            <a href='tel: +79228174046' class="colour_href">+7 922 817 40 46</a> - по вопросам о наличии товаров    
+                            <a href='tel: +79000000000' class="colour_href">+7 900 000 00 00</a> - по вопросам заказов и работе магазинов<br>
+                            <a href='tel: +79000000000' class="colour_href">+7 900 000 00 00</a> - по вопросам о наличии товаров    
                         </div>
                     </div>
                     <div class="contact">
@@ -47,7 +47,7 @@ require_once __DIR__ . '/src/envLoader.php';
                             Электронная почта:
                         </div>
                         <div class="contact_inf">
-                            <a href='mailto: xrqzzf2@smartnator.com' class="colour_href">xrqzzf2@smartnator.com</a> - по всем вопросам<br>
+                            <a href='mailto: mocus8@gmail' class="colour_href">mocus8@gmail.com</a> - по всем вопросам<br>
                             <a href='mailto: mocus8@gmail' class="colour_href">mocus8@gmail.com</a> - по вопросам сотрудничества
                         </div>
                     </div>
