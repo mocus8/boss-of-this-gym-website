@@ -199,7 +199,7 @@ if ($idUser != '') {
                         <span class="registration_modal_input_text">
                             Код подтверждения:
                         </span>
-                        <input required class="registration_modal_input" type="text" placeholder="1234" name="sms_code" maxlength="4">
+                        <input required class="registration_modal_input" type="text" placeholder="12345" name="sms_code" maxlength="5">
                     </div>
                     <button class="registration_modal_sms_code_button" type="button" id="sms-code">
                         Отправить код

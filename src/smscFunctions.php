@@ -4,7 +4,7 @@ require_once __DIR__ . '/smsc_api.php';
 function send_sms_verification($phone) {
     
     // Генерируем код
-    $code = rand(1000, 9999);
+    $code = rand(10000, 99999);
     
     // Сохраняем в сессии
     $_SESSION['sms_verification'] = [
