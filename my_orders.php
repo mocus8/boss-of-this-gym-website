@@ -220,11 +220,13 @@ if (!isset($_SESSION['user']['id'])) {
                         if (isset($_SESSION['flash_cancel_success']) && empty($_SESSION['flash_cancel_success'])) {
                             unset($_SESSION['flash_cancel_success']);
                         }
-                    }
                     ?>
                     <div class="order_refund_info">
                         Для возврата заказа свяжитесь с менеджером (<a href='tel: +74954042791' class="colour_href">+7 495 404 27 91</a>). Вернуть получится только заказы с момента получения которых прошло менее 14 дней
                     </div>
+                    <?php
+                    }
+                    ?>
                 </div>
             </main>
             <?php require_once __DIR__ . '/footer.php';?>
