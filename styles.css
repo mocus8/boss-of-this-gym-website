@@ -2264,11 +2264,15 @@ button {
 
 .orders_list {
     position: relative;
-    margin-top: 6vw;
+    margin-top: 7vw;
+    margin-bottom: 1vw;
     margin-left: 6vw;
     margin-right: 5vw;
     width: 90vw;
-    height: min-content;
+    min-height: 65vh;
+    height: max-content;
+    display: flex;
+    flex-direction: column;
 }
 
 .order {
@@ -2349,7 +2353,7 @@ button {
 
 .order_refund_info {
     position: relative;
-    margin-bottom: 1vw;
+    margin-top: auto;
     border-radius: 0.5vw;
     background-color: #BD1B1B;
     display: flex;
