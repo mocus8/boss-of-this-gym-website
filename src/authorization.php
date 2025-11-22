@@ -34,6 +34,9 @@ $user = $result->fetch_assoc();
 // Проверяем соответствие пароля используя безопасное сравнение
 // password_verify() сравнивает хэш из БД с введенным паролем
 if (password_verify($password, $user['password'])) {
+    // меняем id сессии для безопасности
+    session_regenerate_id(true);
+
     // Сохраняем данные пользователя в сессию
     $_SESSION['user'] = [
         'id' => $user['id'],

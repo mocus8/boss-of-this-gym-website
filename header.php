@@ -4,12 +4,9 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 //подключаем файл хелперс с нужной функцией
 require_once __DIR__ . '/src/helpers.php';
-// ЕСЛИ $db УЖЕ СУЩЕСТВУЕТ - ИСПОЛЬЗУЕМ ЕГО, ЕСЛИ НЕТ - СОЗДАЕМ НОВЫЙ
-if (isset($db) && $db instanceof PDO) {
-    $connect = $db; // Используем существующее соединение
-} else {
-    $connect = getDB(); // Создаем новое
-}
+
+$connect = getDB();
+
 $cartSessionId = getCartSessionId();
 //?-оператор, если условие верно, то $idUser = $_SESSION['user']['id'], если условие ложно, то $idUser = '' (пустая строка)
 $idUser = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : '';
@@ -17,20 +14,21 @@ $idUser = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : '';
 $headerCartCount = 0;
 
 if ($idUser) {
-    $sql = "SELECT SUM(po.amount) as total 
-            FROM product_order po 
-            JOIN orders o ON po.order_id = o.order_id
-            WHERE o.user_id = '$idUser' AND o.status = 'cart'";
+    $stmt = $connect->prepare("SELECT SUM(po.amount) as total 
+                              FROM product_order po 
+                              JOIN orders o ON po.order_id = o.order_id
+                              WHERE o.user_id = ? AND o.status = 'cart'");
+    $stmt->bind_param("i", $idUser);
 } else {
-    $sql = "SELECT SUM(po.amount) as total 
-            FROM product_order po 
-            JOIN orders o ON po.order_id = o.order_id
-            WHERE o.session_id = '$cartSessionId' AND o.status = 'cart'";
+    $stmt = $connect->prepare("SELECT SUM(po.amount) as total 
+                              FROM product_order po 
+                              JOIN orders o ON po.order_id = o.order_id
+                              WHERE o.session_id = ? AND o.status = 'cart'");
+    $stmt->bind_param("s", $cartSessionId);
 }
 
-$stmt = mysqli_prepare($connect, $sql);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result) {
     $cartData = mysqli_fetch_assoc($result);
@@ -155,10 +153,10 @@ if ($idUser != '') {
             <img class="header_account_icon" src="img/person.png">
             <div class="header_account_data">
                 <div class="header_account_inf">
-                    <?= $name ?>
+                    <?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>
                 </div>
                 <div class="header_account_inf">
-                    <?= $login ?>
+                    <?= htmlspecialchars($login, ENT_QUOTES, 'UTF-8') ?>
                 </div>
             </div>
             <div class="header_account_buttons_logged_in">
@@ -199,7 +197,7 @@ if ($idUser != '') {
                         <span class="registration_modal_input_text">
                             Код подтверждения:
                         </span>
-                        <input required class="registration_modal_input" type="text" placeholder="12345" name="sms_code" maxlength="5">
+                        <input class="registration_modal_input" type="text" placeholder="12345" name="sms_code" maxlength="5">
                     </div>
                     <button class="registration_modal_sms_code_button" type="button" id="first-sms-code">
                         <span class="first_sms_code_btn_text">Получить код</span> <span data-action="retry-sms-code-timer"></span> 
@@ -309,7 +307,7 @@ if ($idUser != '') {
                     <span class="registration_modal_input_text">
                         Ваше имя:
                     </span>
-                    <input required class="registration_modal_input" type="text" value="<?= $name ?>" name="name" autocomplete="name">
+                    <input required class="registration_modal_input" type="text" value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>" name="name" autocomplete="name">
                 </div>
                 <div class="registration_modal_input_back">
                     <span class="registration_modal_input_text">

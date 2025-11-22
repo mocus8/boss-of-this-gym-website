@@ -71,6 +71,9 @@ $stmt = $connect->prepare("
 $stmt->bind_param("sss", $login, $hashedPassword, $name);
 
 if ($stmt->execute()) {
+    // меняем id сессии для безопасности
+    session_regenerate_id(true);
+
     $new_user_id = $stmt->insert_id; // Сохраняем ID нового пользователя
     
     $_SESSION['user'] = ['id' => $new_user_id];

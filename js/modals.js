@@ -202,8 +202,7 @@ async function isAttemptsBlocked() {
             incorrectSmsCodeModal.querySelector('.error_modal_text').textContent = `Система заблокирована до ${new Date(result.blocked_until * 1000).toLocaleTimeString()}`;
             incorrectSmsCodeModal.classList.add('open');
 
-            // дебаг 
-            console.log("вызвана функция блокировки");
+            document.querySelector('input[name="sms_code"]').value = '';
 
             return true;
         }
@@ -222,6 +221,8 @@ function toggleSmsCodeState() {
     const phoneChangeButton = document.getElementById('phone-change');
     const SmsCodeSection = document.querySelector('.registration_modal_form').querySelector('input[name="sms_code"]').closest('.registration_modal_input_back');
     const phoneNumberSection = document.querySelector('.registration_modal_form').querySelector('input[name="login"]').closest('.registration_modal_input_back');
+    
+    document.querySelector('input[name="sms_code"]').value = '';
 
     smsFirstCodeButton.classList.toggle('hidden');
     smsRetryCodeButton.classList.toggle('hidden');
@@ -291,6 +292,8 @@ async function sendSmsCode() {
             toggleSmsCodeState();
         }
 
+        document.querySelector('input[name="sms_code"]').value = '';
+
         //это для теста без реальных sms, потом убрать!!!
         alert(`смски дорогие, пока так (но функционал для реальных смс уже есть) Код подтверждения: ${result.debug_code}, был бы отправлен на номер ${result.debug_phone}`);
 
@@ -354,6 +357,8 @@ async function confirmSmsCode() {
         clearResendTimer();
 
         toggleSmsCodeState();
+        
+        document.querySelector('input[name="sms_code"]').value = '';
 
         smsFirstCodeButton.textContent = 'Успешно';
     } catch (error) {
@@ -373,11 +378,9 @@ document.getElementById('retry-sms-code').addEventListener('click', sendSmsCode)
 // изменить телефон
 document.getElementById('phone-change').addEventListener('click', async function(e) {
     toggleSmsCodeState();
-    // isPhoneVerified = false; // Сбрасываем подтверждение
-    // document.querySelector('input[name="sms_code"]').value = ''; // Очищаем код
 });
 
-// Обработчик изменения ввода
+// Обработчик ввода (по 5 символам)
 document.querySelector('input[name="sms_code"]').addEventListener('input', function(e) {
     this.value = this.value.replace(/\D/g, '');
     if (this.value.length === 5) {
@@ -393,8 +396,13 @@ document.querySelector('input[name="sms_code"]').addEventListener('keydown', fun
     }
 });
 
+// потдтерждение формы регистрации
 document.querySelector('.registration_modal_form').addEventListener('submit', async function(e) {
     e.preventDefault();
+
+    if (await isAttemptsBlocked()) {
+        return;
+    }
 
     const token = await getRecaptchaToken(this);
     const phoneNumberInput = this.querySelector('input[name="login"]');
@@ -429,7 +437,7 @@ document.querySelector('.registration_modal_form').addEventListener('submit', as
         const errorMessages = {
             'user_already_exists': 'Пользователь уже зарегистрирован',
             'phone_not_verified': 'Телефон не подтвержден',
-            'phone_changed': 'Телефон был изменен после отправки кода',
+            'phone_changed': 'Телефон был изменен после подтверждения по sms',
             'code_expired': 'Код подтверждения устарел',
             'recaptcha_false': 'Не удалось пройти проверку на ботов.'
         };
