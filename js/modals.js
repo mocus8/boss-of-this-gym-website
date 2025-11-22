@@ -235,11 +235,11 @@ async function isUserAlreadyExist() {
         const result = await response.json();
 
         if (result.success) {
-            return true;
+            return false;
         } else {
             userAlreadyExistsModal.classList.add('open');
 
-            return false;
+            return true;
         }
     } catch (error) {
         incorrectSmsCodeModal.querySelector('.error_modal_text').textContent = `Ошибка проверки блокировки`;
