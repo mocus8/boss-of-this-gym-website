@@ -5,6 +5,7 @@ require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/secure/captchaVerification.php';
 
 // Получаем данные ИЗ POST
+// тут нужно обрабатывать входящий телефон, сейчас этого нет
 $login = $_POST["login"];
 $password = $_POST["password"]; 
 $name = $_POST["name"];

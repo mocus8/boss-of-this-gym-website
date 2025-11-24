@@ -460,48 +460,126 @@ document.querySelector('.registration_modal_form').addEventListener('submit', as
     const incorrectPhoneModal = document.getElementById('incorrect-phone-number-modal');
     const incorrectSmsCodeModal = document.getElementById('incorrect-sms-code-modal');
 
-    if (password !== confirmPassword) {
-        mismatchModal.classList.add('open');
-        return; // ← ВАЖНО: выходим из функции
-    }
+    try {
+        submitRegistrtionButton.textContent = 'Регистрация...';
+        submitRegistrtionButton.disabled = true;
 
-    if (!phoneValidation.isValid) {
-        incorrectPhoneModal.classList.add('open');
-        return; // ← ВАЖНО: выходим из функции
-    }
+        if (password !== confirmPassword) {
+            throw new Error('password_mismatch');
+        }
 
-    // Этот код выполнится ТОЛЬКО если проверки прошли
-    const formData = new FormData(this);
-    formData.append('recaptcha_response', token);
+        if (!phoneValidation.isValid) {
+            throw new Error('incorrect_phone');
+        }
 
-    const result = await fetchWithRetry(this.action, {
-        method: 'POST',
-        body: formData
-    })
+        const formData = new FormData(this);
+        formData.append('recaptcha_response', token);
 
-    if (!result.success) {
+        const result = await fetchWithRetry(this.action, {
+            method: 'POST',
+            body: formData
+        })
+
+        if (!result.success) {
+            throw new Error(result.message);
+        }
+        
+        window.location.reload();
+    } catch (error) {
         const errorMessages = {
             'user_already_exists': 'Пользователь уже зарегистрирован',
             'phone_not_verified': 'Телефон не подтвержден',
             'phone_changed': 'Телефон был изменен после подтверждения по sms',
             'code_expired': 'Код подтверждения устарел',
-            'recaptcha_false': 'Не удалось пройти проверку на ботов.'
+            'recaptcha_false': 'Не удалось пройти проверку на ботов',
+            'error': 'Ошибка'
         };
-        
-        if (result.message === 'user_already_exists') {
+
+        if (error.message === 'user_already_exists') {
             userAlreadyExistsModal.classList.add('open');
-        } else if (errorMessages[result.message]) {
-            incorrectSmsCodeModal.querySelector('.error_modal_text').textContent = errorMessages[result.message];
+        } else if (error.message === 'password_mismatch') {
+            mismatchModal.classList.add('open');
+        } else if (error.message === 'incorrect_phone') {
+            incorrectPhoneModal.classList.add('open');
+        } else if (errorMessages[error.message]) {
+            incorrectSmsCodeModal.querySelector('.error_modal_text').textContent = errorMessages[error.message];
             incorrectSmsCodeModal.classList.add('open');
-        } else if (result.message) {
-            incorrectSmsCodeModal.querySelector('.error_modal_text').textContent = result.message;
+        } else if (error.message) {
+            incorrectSmsCodeModal.querySelector('.error_modal_text').textContent = error.message;
+            incorrectSmsCodeModal.classList.add('open');
+        } else {
+            incorrectSmsCodeModal.querySelector('.error_modal_text').textContent = 'Произошла ошибка';
             incorrectSmsCodeModal.classList.add('open');
         }
-    } else {
-        window.location.reload();
+    } finally {
+        submitRegistrtionButton.textContent = 'Зарегистрироваться';
+        submitRegistrtionButton.disabled = false;
     }
 });
 
+// document.querySelector('.registration_modal_form').addEventListener('submit', async function(e) {
+//     e.preventDefault();
+
+//     if (await isAttemptsBlocked()) {
+//         return;
+//     }
+
+//     const token = await getRecaptchaToken(this);
+
+//     const phoneNumberInput = this.querySelector('input[name="login"]');
+//     const phoneValidation = validatePhoneNumber(phoneNumberInput.value);
+
+//     const password = this.querySelector('input[name="password"]').value;
+//     const confirmPassword = this.querySelector('input[name="confirm-password"]').value;
+    
+//     const submitRegistrtionButton = document.getElementById('submit-registration');
+
+//     const userAlreadyExistsModal = document.getElementById('user-already-exists-modal');
+//     const mismatchModal = document.getElementById('password-mismatch-modal');
+//     const incorrectPhoneModal = document.getElementById('incorrect-phone-number-modal');
+//     const incorrectSmsCodeModal = document.getElementById('incorrect-sms-code-modal');
+
+//     if (password !== confirmPassword) {
+//         mismatchModal.classList.add('open');
+//         return; // ← ВАЖНО: выходим из функции
+//     }
+
+//     if (!phoneValidation.isValid) {
+//         incorrectPhoneModal.classList.add('open');
+//         return; // ← ВАЖНО: выходим из функции
+//     }
+
+//     // Этот код выполнится ТОЛЬКО если проверки прошли
+//     const formData = new FormData(this);
+//     formData.append('recaptcha_response', token);
+
+//     const result = await fetchWithRetry(this.action, {
+//         method: 'POST',
+//         body: formData
+//     })
+
+//     if (!result.success) {
+//         const errorMessages = {
+//             'user_already_exists': 'Пользователь уже зарегистрирован',
+//             'phone_not_verified': 'Телефон не подтвержден',
+//             'phone_changed': 'Телефон был изменен после подтверждения по sms',
+//             'code_expired': 'Код подтверждения устарел',
+//             'recaptcha_false': 'Не удалось пройти проверку на ботов.'
+//         };
+        
+//         if (result.message === 'user_already_exists') {
+//             userAlreadyExistsModal.classList.add('open');
+//         } else if (errorMessages[result.message]) {
+//             incorrectSmsCodeModal.querySelector('.error_modal_text').textContent = errorMessages[result.message];
+//             incorrectSmsCodeModal.classList.add('open');
+//         } else if (result.message) {
+//             incorrectSmsCodeModal.querySelector('.error_modal_text').textContent = result.message;
+//             incorrectSmsCodeModal.classList.add('open');
+//         }
+//     } else {
+//         window.location.reload();
+//     }
+// });
 
 //открытие ошибки о несовпадении старого пароля
 document.querySelector('.account_edit_modal .registration_modal_form').addEventListener('submit', function(e) {

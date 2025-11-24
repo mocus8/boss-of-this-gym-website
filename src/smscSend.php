@@ -5,6 +5,7 @@ require_once __DIR__ . '/smscFunctions.php';
 header('Content-Type: application/json');
 
 $input = json_decode(file_get_contents('php://input'), true);
+// тут нужно обрабатывать входящий телефон, сейчас этого нет
 $phone = $input['phone'] ?? '';
 
 if (empty($phone)) {
