@@ -97,7 +97,7 @@ async function getRecaptchaToken(form) {
     return await grecaptcha.execute(siteKey, {action: 'submit'});
 }
 
-// крутой объект для универсальной модалки в хедере с текстом
+// крутой объект через IIFE для универсальной модалки в хедере с текстом
 const HeaderModal = (function() {
     let closeTimer = null;
     let modal, text, progress, closeBtn;
@@ -180,67 +180,86 @@ document.querySelector('.authorization_modal_form').addEventListener('submit', f
     });
 });
 
-let resendTimer = null;
-let resendTimeLeft = 0;
+// крутой объект через IIFE для управления SMS таймерами 
+const SmsTimerManager = (function() {
+    let resendTimer = null;
+    let resendTimeLeft = 0;
+    let smsFirstCodeButton, smsRetryCodeButton, timerSpans;
 
-//запуск таймера повторной отправки
-function startResendTimer(seconds = 60) {
-    const smsFirstCodeButton = document.getElementById('first-sms-code');
-    const smsRetryCodeButton = document.getElementById('retry-sms-code');
+    function init() {
+        smsFirstCodeButton = document.getElementById('first-sms-code');
+        smsRetryCodeButton = document.getElementById('retry-sms-code');
+        timerSpans = document.querySelectorAll(`[data-action="retry-sms-code-timer"]`);
 
-    resendTimeLeft = seconds;
-    
-    // Блокируем кнопки сразу
-    smsFirstCodeButton.disabled = true;
-    smsRetryCodeButton.disabled = true;
-    
-    resendTimer = setInterval(() => {
-        resendTimeLeft--;
+        if (!smsFirstCodeButton || !smsRetryCodeButton || timerSpans.length === 0) {
+            console.error('Modal elements not found');
+            return;
+        }
+    }
+
+    //запуск таймера повторной отправки
+    function startResendTimer(seconds = 60) {
+        resendTimeLeft = seconds;
         
-        const timerSpans = document.querySelectorAll(`[data-action="retry-sms-code-timer"]`);
+        // Блокируем кнопки сразу
+        smsFirstCodeButton.disabled = true;
+        smsRetryCodeButton.disabled = true;
         
-        if (resendTimeLeft <= 0) {
+        resendTimer = setInterval(() => {
+            resendTimeLeft--;
+            
+            if (resendTimeLeft <= 0) {
+                clearInterval(resendTimer);
+                smsFirstCodeButton.disabled = false;
+                smsRetryCodeButton.disabled = false;
+                timerSpans.forEach(span => {
+                    span.textContent = ``;
+                });
+            } else {
+                timerSpans.forEach(span => {
+                    span.textContent = `(${resendTimeLeft}с)`;
+                });
+            }
+        }, 1000);
+    }
+
+    //остановка таймера повторной отправки
+    function clearResendTimer() {
+        if (resendTimer) {
             clearInterval(resendTimer);
-            smsFirstCodeButton.disabled = false;
-            smsRetryCodeButton.disabled = false;
+            resendTimer = null;
+            resendTimeLeft = 0;
+
             timerSpans.forEach(span => {
                 span.textContent = ``;
             });
-        } else {
-            timerSpans.forEach(span => {
-                span.textContent = `(${resendTimeLeft}с)`;
-            });
         }
-    }, 1000);
-}
-
-//остановка таймера повторной отправки
-function clearResendTimer() {
-    const timerSpans = document.querySelectorAll(`[data-action="retry-sms-code-timer"]`);
-    if (resendTimer) {
-        clearInterval(resendTimer);
-        resendTimer = null;
-        resendTimeLeft = 0;
-
-        timerSpans.forEach(span => {
-            span.textContent = ``;
-        });
     }
-}
 
-//запуск таймера блокировки 
-function startUnlockTimer(blockedUntilTimestamp) {
-    clearResendTimer();
-    
-    const interval = setInterval(() => {
-        const now = Math.floor(Date.now() / 1000);
-        const timeLeft = blockedUntilTimestamp - now;
+    //запуск таймера блокировки 
+    function startUnlockTimer(blockedUntilTimestamp) {
+        clearResendTimer();
         
-        if (timeLeft <= 0) {
-            clearInterval(interval);
-        }
-    }, 1000);
-}
+        const interval = setInterval(() => {
+            const now = Math.floor(Date.now() / 1000);
+            const timeLeft = blockedUntilTimestamp - now;
+            
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+            }
+        }, 1000);
+    }
+
+    // Автоинициализация при загрузке
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    
+    // возвращаем функции для открытия и закрытия
+    return { startResendTimer, clearResendTimer,  startUnlockTimer};
+})(); // () на конце выполняет сразу (для всех функций), и это исользуется все последующее разы
 
 // проверка на блок по попыткам
 async function isAttemptsBlocked() {
@@ -255,8 +274,8 @@ async function isAttemptsBlocked() {
         }
 
         if (result.error === 'blocked') {
-            clearResendTimer();
-            startUnlockTimer(result.blocked_until);
+            SmsTimerManager.clearResendTimer();
+            SmsTimerManager.startUnlockTimer(result.blocked_until);
 
             incorrectSmsCodeModal.querySelector('.error_modal_text').textContent = `Система заблокирована до ${new Date(result.blocked_until * 1000).toLocaleTimeString()}`;
             incorrectSmsCodeModal.classList.add('open');
@@ -276,6 +295,7 @@ async function isAttemptsBlocked() {
 // проверка наличия пользователя
 async function isUserAlreadyExist() {
     const userAlreadyExistsModal = document.getElementById('user-already-exists-modal');
+    const incorrectSmsCodeModal = document.getElementById('incorrect-sms-code-modal');
     
     const phoneNumberInput = document.querySelector('.registration_modal_form').querySelector('input[name="login"]');
     const phoneValidation = validatePhoneNumber(phoneNumberInput.value);
@@ -394,7 +414,7 @@ async function sendSmsCode() {
 
         HeaderModal.open('SMS-код был отправлен на указанный номер');
 
-        startResendTimer(30);
+        SmsTimerManager.startResendTimer(30);
     } catch (error) {
         if (smsFirstCodeButton.classList.contains('hidden')) {
             toggleSmsCodeState();
@@ -443,7 +463,7 @@ async function confirmSmsCode() {
         const result = await response.json();
 
         if (result.error === 'blocked') {
-            startUnlockTimer(result.blocked_until);
+            SmsTimerManager.startUnlockTimer(result.blocked_until);
             smsFirstCodeButton.disabled = false;
             smsRetryCodeButton.disabled = false;
             throw new Error(`Система заблокирована до ${new Date(result.blocked_until * 1000).toLocaleTimeString()}`);
@@ -453,7 +473,7 @@ async function confirmSmsCode() {
             throw new Error(result.error || result.message || `Ошибка ${response.status}! Попробуйте еще раз`);
         }
 
-        clearResendTimer();
+        SmsTimerManager.clearResendTimer();
 
         phoneNumberInput.value = validatePhoneNumber(phoneNumberInput.value).formatted;
         phoneNumberInput.readOnly = true;
