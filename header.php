@@ -175,7 +175,7 @@ if ($idUser != '') {
         }
     ?>
     <div class="header_modal" id="header-modal">
-        <button class="header_modal_close_btn">✕</button>
+        <button class="header_modal_close_btn" id="header-modal-close">✕</button>
         <div class="header_modal_top">
             <img class="header_modal_icon"src="img/inf.png">
             <div class="header_modal_text" id="header-modal-text">тестовый текст</div>

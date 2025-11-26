@@ -97,10 +97,72 @@ async function getRecaptchaToken(form) {
     return await grecaptcha.execute(siteKey, {action: 'submit'});
 }
 
-// Открытие универсальной модалки в хедере с текстом
-function openHeaderModal(innerText) {
+// крутой объект для универсальной модалки в хедере с текстом
+const HeaderModal = (function() {
+    let closeTimer = null;
+    let progressTimer = null;
+    let modal, text, progress, closeBtn;
+
+    function init() {
+        modal = document.getElementById('header-modal');
+        text = document.getElementById('header-modal-text');
+        progress = document.getElementById('header-modal-progress-fill');
+        closeBtn = document.getElementById('header-modal-close');
+
+        if (!modal || !text || !progress || !closeBtn) {
+            console.error('Modal elements not found');
+            return;
+        }
+
+        closeBtn.addEventListener('click', close);
+    }
+
+    function open(innerText) {
+        if (!modal) return;
+
+        close();
+
+        text.textContent = innerText;
+        progress.style.width = '100%';
+        modal.classList.remove("hidden");
+
+       closeTimer = setTimeout(close, 5000);
+        
+        let width = 100;
+        progressTimer = setInterval(() => {    // setInterval работает бесконечно, каждый заданный промежуток времени, нужно останавливать в конце
+            width -= 1;
+            progress.style.width = width + '%';
+            
+            if (width <= 0) {
+                clearInterval(progressTimer);
+            }
+        }, 50);
+    }
+
+    function close() {
+        if (!modal) return;
+
+        modal.classList.add("hidden");
+
+        if(text) text.textContent = '';
+
+        if (closeTimer) clearTimeout(closeTimer);
+        if (progressTimer) clearInterval(progressTimer);
+
+        closeTimer = null;
+        progressTimer = null;
+    }
+
+    // Автоинициализация при загрузке
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
     
-}
+    // возвращаем функции для открытия и закрытия
+    return { open, close };
+})(); // () на конце выполняет сразу (для всех функций), и это исользуется все последующее разы
 
 document.querySelector('.authorization_modal_form').addEventListener('submit', function(e) {
     //предотвращаем стандартную отправку формы
