@@ -132,6 +132,7 @@ if ($idUser != '') {
                 Поиск товаров:
             </label>
             <input type="search" id="header-search-input" name="q" placeholder="гриф для штанги ..." class="header_search_input" autocomplete="off" maxlength="150">
+            <button class="header_search_cancel_button hidden" id="header-search-cancel-button">✕</button>
         </div>
     </div>
     <?php

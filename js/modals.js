@@ -488,9 +488,22 @@ document.querySelectorAll('input[name="name"]').forEach(input => {
 
 // Обработчик поиска товаров
 document.getElementById('header-search-input').addEventListener('input', function(e) {
+    const headerSearchCancelButton  = document.getElementById('header-search-cancel-button');
+    headerSearchCancelButton.classList.toggle('hidden', !this.value);
+
     if (this.value != '') {
-        console.log("что то етсь")
+        console.log("что то есть")
     }
+});
+
+// очистка поля ввода
+document.getElementById('header-search-cancel-button').addEventListener('click', function(e) {
+    const headerSearchInput  = document.getElementById('header-search-input');
+    headerSearchInput.value = '';
+
+    this.classList.add('hidden');
+
+    headerSearchInput.focus();
 });
 
 // потдтверждение формы регистрации

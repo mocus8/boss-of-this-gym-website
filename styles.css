@@ -57,6 +57,12 @@ input:autofill:active {
     border-radius: 0.2vw;
 }
 
+::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+}
+
 @font-face {
     font-family: "Jost";
     src: url(./font/Jost_Italic.woff2) format("woff2");
@@ -287,6 +293,25 @@ button {
     border: none;
     outline: none;
     width: 70%;
+}
+
+.header_search_cancel_button {
+    position: absolute;
+    right: 1.5vw;
+    font-size: 1.75vw;
+    font-family: "Jost", Arial;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.header_search_cancel_button:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0.2vw 0.2vw 0.4vw rgba(0, 0, 0, 0.5));
+    cursor: pointer;
+}
+
+.header_search_cancel_button:active {
+    transform: scale(1);
+    transition: transform 0.05s ease
 }
 
 .header_account {
