@@ -40,13 +40,13 @@ if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
         ORDER BY ctg.name, prdct.name
     ";
 
-    $stmt = mysqli_prepare($connect, $sql);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+    $stmt = $connect->prepare($sql);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     $categoriesWithProducts = [];
     
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = $result->fetch_assoc()) {
         $categoryId = $row['ctg_id'];
         
         if (!isset($categoriesWithProducts[$categoryId])) {
