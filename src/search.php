@@ -30,8 +30,15 @@ $sql = "
             prdct.slug as prdct_slug,
             prdct.name as prdct_name,
             prdct.price as prdct_price,
+            prdct.description as prdct_description,
             img.image_id as img_id,
-            img.image_path as img_path
+            img.image_path as img_path,
+            (CASE 
+                WHEN prdct.name LIKE ? THEN 10
+                WHEN prdct.name LIKE ? THEN 5  
+                WHEN prdct.description LIKE ? THEN 1
+                ELSE 0
+            END) as relevance
         FROM products prdct
         LEFT JOIN product_images img ON prdct.product_id = img.product_id
             AND img.image_id = (
@@ -39,19 +46,18 @@ $sql = "
                 FROM product_images img2 
                 WHERE img2.product_id = prdct.product_id
             )
-        WHERE prdct.name LIKE ? 
-        ORDER BY prdct.name
+        WHERE " . implode(' AND ', $conditions) . "
+        ORDER BY relevance DESC, prdct.name
     ";
 
-$searchTerm = "%$query%";
 $stmt = $connect->prepare($sql);
-$stmt->bind_param("s", $searchTerm);
+$stmt->bind_param("ss", $query, $query);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows == 0) {
     http_response_code(200);
-    echo json_encode(['queryProducts' => []]);
+    echo json_encode([]);
     exit;
 }
 

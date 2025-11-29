@@ -133,11 +133,7 @@ if ($idUser != '') {
             </label>
             <input type="search" id="header-search-input" name="q" placeholder="гриф для штанги ..." class="header_search_input" autocomplete="off" maxlength="150">
             <button class="header_search_cancel_button hidden" id="header-search-cancel-button">✕</button>
-            <div class="query_products_container hidden" id="query-products-container">
-                <div class="search_empty hidden" id="search-empty">
-                    Ничего не найдено
-                </div>
-            </div>
+            <div class="query_products_container hidden" id="query-products-container"></div>
         </div>
     </div>
     <?php

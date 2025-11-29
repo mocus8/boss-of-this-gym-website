@@ -527,24 +527,54 @@ document.getElementById('header-search-input').addEventListener('input', (functi
             headerSearchCancelButton.classList.toggle('hidden', !query);
 
             if (!query) return;
+            
+            const loaderTimer = setTimeout(() => {
+                queryProductsContainer.innerHTML = `<div class="search_empty">Поиск...</div>`;
+            }, 200);
         
             try {
                 const response = await fetch(`/src/search.php?q=${encodeURIComponent(query)}`);
+
+                clearTimeout(loaderTimer);
         
                 if (!response.ok) {
                     const errorData = await parseResponse(response);
-                    throw new Error(errorData.error);
+                    const error = new Error(errorData.error);
+                    error.status = response.status;
+                    throw error;
                 }
         
                 const queryProducts = await parseResponse(response);
-                // Тут нужно отрендерить товары в queryProductsContainer
-                console.log(queryProducts);
-        
+
+                if (queryProducts.length == 0) {
+                    queryProductsContainer.innerHTML = `<div class="search_empty">Ничего не найдено</div>`;
+                } else {
+                    queryProductsContainer.innerHTML = queryProducts.map(queryProduct => `
+                        <a href="product/${queryProduct.slug}">
+                                <div class="product">
+                                    <div class="product_click">
+                                        <img class="product_img_1" src="${queryProduct.image_path}">
+                                        <div class="product_name_1">
+                                            ${queryProduct.name}
+                                        </div>
+                                        <div class="product_price_1">
+                                            ${queryProduct.price} ₽
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                    `).join('');
+                }
             } catch (error) {
-                // тут нужно ошибку переводить на понятный язык
-                console.log(error);
-        
-                HeaderModal.open('Ошибка поиска');
+                clearTimeout(loaderTimer);
+
+                if (error.status === 400) {
+                    queryProductsContainer.innerHTML = `<div class="search_empty">Ошибка, неверный запрос</div>`;
+                } else if (error.status === 500) {
+                    queryProductsContainer.innerHTML = `<div class="search_empty">Ошибка сервера</div>`;
+                } else {
+                    queryProductsContainer.innerHTML = `<div class="search_empty">Ошибка поиска</div>`;
+                }
             }
         }, 300);
     };

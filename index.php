@@ -115,7 +115,7 @@ if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
                                                     <?= htmlspecialchars($ProductData['name']) ?>
                                                 </div>
                                                 <div class="product_price_1">
-                                                    <?= htmlspecialchars($ProductData['price']) ?>
+                                                    <?= htmlspecialchars($ProductData['price']) ?> ₽
                                                 </div>
                                             </div>
                                         </div>
