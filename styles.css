@@ -1080,11 +1080,24 @@ button {
     margin-left: 0.5%;
     width: 22.5%;
     height: 100%;
-    font-size: 1vw;
-    font-family: "Jost", Arial;
     display: flex;
+    flex-direction: column;
+}
+
+.footer_disklamer_text {
+    width: 100%;
     text-align: justify;
-    align-items: center; 
+    font-size: 1vw;
+    line-height: 1.35;
+    font-family: "Jost", Arial;
+}
+
+.footer_disklamer_href {
+    margin-left: 1.3vw;
+    width: 100%;
+    white-space: nowrap;
+    font-size: 1.25vw;
+    font-family: "Jost", Arial;
 }
 
 .footer_mail {

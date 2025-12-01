@@ -1,8 +1,12 @@
 <footer class="footer">
     <div class="footer_inf">
         <div class="footer_disklamer">
-            Этот сайт создан для демонстрации навыков его разработчика и не предоставляет никаких реальных услуг в сфере продажи. Создатель сайта не претендует ни на какие права, 
-            <a href="privacy.php" class="colour_href" target="_blank">политика конфиденциальности</a>
+            <div class="footer_disklamer_text">
+                Внимание: Этот сайт создан для демонстрации навыков разработки и не осуществляет реальную коммерческую деятельность.
+            </div>
+            <div class="footer_disklamer_href">
+                <a href="privacy.php" class="colour_href" target="_blank">Политика конфиденциальности</a>
+            </div>
         </div>
         <div class="footer_mail">
             По всем вопросам писать на почту: <a href='mailto: mocus8@gmail' class="colour_href">mocus8@gmail.com</a>
