@@ -75,8 +75,9 @@ function setupModal(modalId, openBtnId, closeBtnId){
 }
 
 setupModal("authorization-modal", "open-authorization-modal", "close-authorization-modal");
-setupModal("registration-modal", "open-registration-modal-from-cart", "close-registration-modal");
+setupModal("authorization-modal", "open-my-orders-for-guest", "close-authorization-modal");
 setupModal("registration-modal", "open-registration-modal", "close-registration-modal");
+setupModal("registration-modal", "open-registration-modal-from-cart", "close-registration-modal");
 setupModal("account-edit-modal", "open-account-editior-modal", "close-account-edit-modal");
 setupModal("account-delete-modal", "open-account-edit-modal", "close-account-delete-modal");
 setupModal("account-exit-modal", "open-account-exit-modal", "close-account-exit-modal");

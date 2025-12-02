@@ -78,7 +78,7 @@ if ($idUser != '') {
         <?php
         if (!$idUser) {
         ?>
-        <a class="order-button-link" id="open-registration-modal-from-cart">
+        <a class="order-button-link" id="open-my-orders-for-guest" style="cursor: pointer;">
             <div class="header_button">
                 <img class="header_button_icon" src="img/box.png">
                 <div class="header_button_text">
@@ -395,23 +395,3 @@ if ($idUser != '') {
     <script defer src="/js/inputmask.min.js"></script>
     <script defer src="js/modals.js"></script>
 </header>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
