@@ -5,7 +5,7 @@
                 Внимание: Этот сайт создан для демонстрации навыков разработки и не осуществляет реальную коммерческую деятельность.
             </div>
             <div class="footer_disklamer_href">
-                <a href="privacy.php" class="colour_href" target="_blank">Политика конфиденциальности</a>
+                <a href="privacy.php" class="colour_href">Политика конфиденциальности</a>
             </div>
         </div>
         <div class="footer_mail">
