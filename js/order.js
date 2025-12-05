@@ -88,90 +88,72 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
         const pickupAddress = document.getElementById('order-right-pickup-address').innerText;
         const originalText = button.textContent;
 
+        // сброс предыдущих ошибок адреса ()? выполняет только если элемент есть на странице, так не будет ошибки)
+        document.getElementById("error-pay-delivery-no-address")?.classList.remove("open");
+        document.getElementById("error-pay-pickup-no-address")?.classList.remove("open");
+
+        // блокируем кнопку на время выполнения скрипта
         button.disabled = true;
         button.textContent = 'Создаем платеж...';
-        
+
+        // проверка на отсутствие адреса доставки
         if (isDelivery && deliveryAddress.includes("не указан")) {
-            document.getElementById("error-pay-delivery-no-address").classList.add("open");
-        } else if (!isDelivery && pickupAddress.includes("не указан")) {
-            document.getElementById("error-pay-pickup-no-address").classList.add("open");
-        } else {
-            try {
-                // ПЕРЕДАЕМ order_id В POST
-                const response = await fetch('/create_payment.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        order_id: orderId
-                    })
-                });
-                                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
-                }
-                
-                const result = await response.json();
-                
-                if (result.confirmation_url) {
-                    window.location.href = result.confirmation_url;
+            document.getElementById("error-pay-delivery-no-address")?.classList.add("open");
 
-                } else {
-                    throw new Error(result.error || 'Payment error');
-                }
+            button.disabled = false;
+            button.textContent = originalText;
 
-            } catch (error) {
-                console.error('Full error:', error);
-                alert('Ошибка: ' + error.message);
+            return;
+        }
 
-            } finally {
-                button.disabled = false;
-                button.textContent = originalText;
+        // проверка на отсутствие выбранного магазина для самовывоза
+        if (!isDelivery && pickupAddress.includes("не указан")) {
+            document.getElementById("error-pay-pickup-no-address")?.classList.add("open");
+
+            button.disabled = false;
+            button.textContent = originalText;
+
+            return;
+        }
+
+        // ТУТ ПРОДОЛЖИТЬ ФИКСИТЬ ОБРОБОТЧИК
+
+        try {
+            // ПЕРЕДАЕМ order_id В POST
+            const response = await fetch('/create_payment.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    order_id: orderId
+                })
+            });
+                            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
             }
+
+            const result = await response.json();
+            
+            if (result.confirmation_url) {
+                window.location.href = result.confirmation_url;
+
+            } else {
+                throw new Error(result.error || 'Payment error');
+            }
+
+        } catch (error) {
+            console.error('Full error:', error);
+            alert('Ошибка: ' + error.message);
+
+        } finally {
+            button.disabled = false;
+            button.textContent = originalText;
         }
     });
 });
-
-
-
-
-//версия без отладки
-// document.querySelectorAll('.order_right_pay_button').forEach(button => {
-//     button.addEventListener('click', async function() {
-//         const isDelivery = document.getElementById('order-type-delivery').classList.contains('chosen');
-//         const deliveryAddress = document.getElementById('order-right-delivery-address').innerText;
-//         const pickupAddress = document.getElementById('order-right-pickup-address').innerText;
-        
-//         // Закрываем все ошибки сначала
-//         // closeErrorModal("error-pay-delivery-no-address");
-//         // closeErrorModal("error-pay-pickup-no-address");
-        
-//         if (isDelivery && deliveryAddress.includes("не указан")) {
-//             document.getElementById("error-pay-delivery-no-address").classList.add("open");
-//         } else if (!isDelivery && pickupAddress.includes("не указан")) {
-//             document.getElementById("error-pay-pickup-no-address").classList.add("open");
-//         } else {
-//             //здесь логика оплаты черз юкассу
-//             try {
-//                 const response = await fetch('/create_payment.php', {
-//                     method: 'POST'
-//                 });
-                
-//                 const result = await response.json();
-                
-//                 if (result.confirmation_url) {
-//                     window.location.href = result.confirmation_url;
-//                 } else {
-//                     throw new Error(result.error || 'Payment error');
-//                 }
-//             } catch (error) {
-//                 alert('Ошибка: ' + error.message);
-//             }
-//         }
-//     });
-// });
 
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('order_right_pay_button')) {
