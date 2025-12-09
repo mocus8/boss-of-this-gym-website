@@ -2021,15 +2021,9 @@ button {
     margin-bottom: 0.7vw;
     margin-left: 50%;
     transform: translateX(-50%);
-    visibility: hidden;
-    display: none;
+    display: flex;
     flex-direction: row;
     gap: 1.5vw;
-}
-
-.modal_order_type.open {
-    visibility: visible;
-    display: flex;
 }
 
 .order_left {
@@ -2355,7 +2349,7 @@ button {
     height: max-content;
 }
 
-.error_pay_no_address{
+.error_pay{
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -2373,15 +2367,15 @@ button {
     font-family: "Kolibri Light", "Kolibri-Light", "Kolibri", sans-serif;
     font-size: 0.9vw;
     font-weight: 100;
-    visibility: hidden;
-    opacity: 0;
+    /* visibility: hidden;
+    opacity: 0; */
     transition: opacity .4s, visibility .4s;
 }
 
-.error_pay_no_address.open {
+/* .error_pay.open {
     visibility: visible;
     opacity: 1;
-}
+} */
 
 .pickup_text {
     margin-bottom: 1vw;

@@ -52,7 +52,7 @@ if ($cartCount === 0) {
                     Самовывоз
                 </div>
             </div>
-            <div class="modal_order_type open" id="modal-order-type-delivery">
+            <div class="modal_order_type" id="modal-order-type-delivery">
                 <div class="order_left">
                     <div class="map_search_form">
                        <input type="text"
@@ -83,13 +83,13 @@ if ($cartCount === 0) {
                         <img class="error_modal_icon" src="img/error_modal_icon.png">
                         Адрес не найден
                     </div>
-                    <div class="error_address_not_found" id="modal-error-address-empty">
-                        <img class="error_modal_icon" src="img/error_modal_icon.png">
-                        Введите адрес
-                    </div>
                     <div class="error_address_not_found" id="modal-error-address-timeout">
                         <img class="error_modal_icon" src="img/error_modal_icon.png">
                         Проблемы с соединением. Попробуйте еще раз
+                    </div>
+                    <div class="error_address_not_found" id="modal-error-address-empty">
+                        <img class="error_modal_icon" src="img/error_modal_icon.png">
+                        Введите адрес
                     </div>
                 </div>
                 <div class="order_right">
@@ -131,14 +131,14 @@ if ($cartCount === 0) {
                             Сайт работает в тестовом режиме, не используейте реальные карты. <br>
                             Карты для теста: 5555555555554444 (успех), 5555555555554535 (ошибка)
                         </div>
-                        <div class="error_pay_no_address" id="error-pay-delivery-no-address">
+                        <div class="error_pay hidden" id="error-pay-delivery">
                             <img class="error_modal_icon" src="img/error_modal_icon.png">
-                            Укажите адрес доставки
+                            <div id="error-pay-delivery-text"></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal_order_type" id="modal-order-type-pickup">
+            <div class="modal_order_type hidden" id="modal-order-type-pickup">
                 <div class="order_left">
                     <div class="pickup_text">
                         Выберите магазин для самовывоза:
@@ -180,9 +180,9 @@ if ($cartCount === 0) {
                             Сайт работает в тестовом режиме, не используейте реальные карты. <br>
                             Карты для теста: 5555555555554444 (успех), 5555555555554535 (ошибка)
                         </div>
-                        <div class="error_pay_no_address" id="error-pay-pickup-no-address">
+                        <div class="error_pay hidden" id="error-pay-pickup">
                             <img class="error_modal_icon" src="img/error_modal_icon.png">
-                            Укажите магазин для самовывоза
+                            <div id="error-pay-pickup-text"></div>
                         </div>
                     </div>
                 </div>

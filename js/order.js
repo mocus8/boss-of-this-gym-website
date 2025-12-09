@@ -7,8 +7,7 @@ function clearOrderInterface(previousType) {
         document.getElementById('modal-error-address-empty').classList.remove('open');
         document.getElementById('modal-error-address-not-found').classList.remove('open');
         document.getElementById('modal-error-address-timeout').classList.remove('open');
-        document.getElementById('error-pay-delivery-no-address').classList.remove('open');
-        document.getElementById('error-pay-pickup-no-address').classList.remove('open');
+        PayErrorModal.close();
     } else {
         // Очищаем интерфейс самовывоза
         document.getElementById('order-right-pickup-address').textContent = 'не указан';
@@ -23,6 +22,79 @@ function clearOrderInterface(previousType) {
         });
     }
 }
+
+// крутой объект через IIFE для универсальной модалки ошибки оплаты с текстом
+const PayErrorModal = (function() {
+    let isDelivery, deliveryModal, PickupModal, deliveryModalText, PickupModalText;
+
+    function init() {
+        isDelivery = document.getElementById('order-type-delivery').classList.contains('chosen');
+        deliveryModal = document.getElementById('error-pay-delivery');
+        PickupModal = document.getElementById('error-pay-pickup');
+        deliveryModalText = document.getElementById('error-pay-delivery-text');
+        PickupModalText = document.getElementById('error-pay-pickup-text');
+
+        if (!isDelivery || !deliveryModal || !PickupModal || !deliveryModalText || !PickupModalText) {
+            console.error('Modal elements not found');
+            return;
+        }
+
+        document.addEventListener('click', function(e) {
+            // закрывается при нажатии НЕ на кнопку и НЕ на модалку, чтобы не закрывалась сразу
+            if (e.target.classList.contains('order_right_pay_button')) {
+                return;
+            }
+            if (e.target.closest('.error_pay')) {
+                return;
+            }
+        
+            close();
+        });
+    }
+
+    function open(innerText) {
+
+        // открытие для случая доставки
+        if (isDelivery) {
+            if (!deliveryModal) return;
+
+            close();
+
+            deliveryModalText.textContent = innerText;
+            deliveryModal.classList.remove("hidden");
+
+        } else if (!isDelivery) {
+            // открытие для случая самовывоза
+
+            if (!PickupModal) return;
+
+            close();
+
+            PickupModalText.textContent = innerText;
+            PickupModal.classList.remove("hidden");
+        }
+    }
+
+    function close() {
+        if (!deliveryModal || !PickupModal) return;
+
+        deliveryModal.classList.add("hidden");
+        PickupModal.classList.add("hidden");
+
+        if(deliveryModalText) deliveryModalText.textContent = '';
+        if(PickupModalText) PickupModalText.textContent = '';
+    }
+
+    // Автоинициализация при загрузке
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    
+    // возвращаем функции для открытия и закрытия
+    return { open, close };
+})(); // () на конце выполняет сразу (для всех функций), и это исользуется все последующее разы
 
 // Функция обновления типа доставки в БД
 function updateDeliveryTypeInDB(deliveryType) {
@@ -64,8 +136,8 @@ document.querySelector('.order_types').addEventListener('click', function(e) {
 
     // Переключение модалок
     // toggle автоматически добавляет или удаляет класс
-    document.getElementById('modal-order-type-delivery').classList.toggle('open', isDelivery);
-    document.getElementById('modal-order-type-pickup').classList.toggle('open', !isDelivery);
+    document.getElementById('modal-order-type-delivery').classList.toggle('hidden', !isDelivery);
+    document.getElementById('modal-order-type-pickup').classList.toggle('hidden', isDelivery);
     
     // Переключение стилей кнопок выбора типа доставки
     document.getElementById('order-type-delivery').classList.toggle('chosen', isDelivery);
@@ -83,40 +155,26 @@ document.querySelector('.order_types').addEventListener('click', function(e) {
 document.querySelectorAll('.order_right_pay_button').forEach(button => {
     button.addEventListener('click', async function() {
         const orderId = this.getAttribute('data-order-id');
-        const isDelivery = document.getElementById('order-type-delivery').classList.contains('chosen');
         const deliveryAddress = document.getElementById('order-right-delivery-address').innerText;
         const pickupAddress = document.getElementById('order-right-pickup-address').innerText;
         const originalText = button.textContent;
 
-        // сброс предыдущих ошибок адреса ()? выполняет только если элемент есть на странице, так не будет ошибки)
-        document.getElementById("error-pay-delivery-no-address")?.classList.remove("open");
-        document.getElementById("error-pay-pickup-no-address")?.classList.remove("open");
+        // сброс предыдущих ошибок адреса
+        PayErrorModal.close();
 
         // блокируем кнопку на время выполнения скрипта
         button.disabled = true;
         button.textContent = 'Создаем платеж...';
 
-        // проверка на отсутствие адреса доставки
-        if (isDelivery && deliveryAddress.includes("не указан")) {
-            document.getElementById("error-pay-delivery-no-address")?.classList.add("open");
+        // проверка на отсутствие адреса получения (самовывоза или доставки)
+        if (deliveryAddress.includes("не указан") || pickupAddress.includes("не указан")) {
+            PayErrorModal.open('Укажите адрес получения.');
 
             button.disabled = false;
             button.textContent = originalText;
 
             return;
         }
-
-        // проверка на отсутствие выбранного магазина для самовывоза
-        if (!isDelivery && pickupAddress.includes("не указан")) {
-            document.getElementById("error-pay-pickup-no-address")?.classList.add("open");
-
-            button.disabled = false;
-            button.textContent = originalText;
-
-            return;
-        }
-
-        // ТУТ ПРОДОЛЖИТЬ ФИКСИТЬ ОБРОБОТЧИК
 
         try {
             // ПЕРЕДАЕМ order_id В POST
@@ -129,13 +187,21 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
                     order_id: orderId
                 })
             });
+
+            // Проверка что ответ JSON
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                // ТУТ ЭТУ ФУНКЦИЮ НАПИСАТЬ, ДОБАВИТЬ УНИВЕРСАЛЬНУЮ/ИСПОЛЬЗОВАТЬ СТАРУЮ ОШИБКУ
+                showUserError('Некорректный ответ от сервера');
+                return;
+            }
                             
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`HTTP ${response.status}: ${errorText}`);
             }
-
-            const result = await response.json();
             
             if (result.confirmation_url) {
                 window.location.href = result.confirmation_url;
@@ -153,16 +219,4 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
             button.textContent = originalText;
         }
     });
-});
-
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('order_right_pay_button')) {
-        return;
-    }
-    if (e.target.closest('.error_pay_no_address')) {
-        return;
-    }
-
-    closeErrorModal("error-pay-delivery-no-address");
-    closeErrorModal("error-pay-pickup-no-address");
 });
