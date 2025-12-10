@@ -1,4 +1,3 @@
-
 // СКРЫВАЕМ ОШИБКИ АДРЕСА ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.error_address_not_found').forEach(block => {
@@ -9,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 //  Показ ошибки
 function showMapError(type = 'all') {
-
     console.error('Ошибка Яндекс.Карт:', type);
     
     let className = `error_${type}_map`;
@@ -83,7 +81,7 @@ function initStoresMap(){
     }
 }
 
-// Карта доставки
+// Класс через ES6 для карты доставки
 function initDeliveryMap(){
     // защита от повторного вызова
     const container = document.getElementById('delivery-map');
@@ -102,7 +100,6 @@ function initDeliveryMap(){
     let marker = null;
     const addressInput = document.getElementById('delivery-address');
     const searchBtn = document.getElementById('delivery-search-btn');
-    const typeToPickupBtn = document.getElementById('order-type-pickup');
 
     // Санитизация ввода
     function sanitizeAddress(address) {
@@ -306,7 +303,7 @@ function initDeliveryMap(){
     //     addressInput.classList.add('has-suggestions');
     // }
 
-    //ИНИЦИАЛИЗАЦИЯ DADATA КЛЮЧ ЧЕРЕЗ
+    //ИНИЦИАЛИЗАЦИЯ DADATA
     if (addressInput) {
         fetch('src/serviceProxy.php')
             .then(response => response.json())
@@ -346,15 +343,6 @@ function initDeliveryMap(){
         });
     }
 
-    // Обработчик кнопки переключения типа (с доставки на самовывоз)
-    if (typeToPickupBtn) {
-        typeToPickupBtn.addEventListener('click', function() {
-            if (!typeToPickupBtn.classList.contains('chosen')) {
-                clearDeliveryMap();
-            }
-        });
-    }
-
     // Плавно убираем лоадер
     const loader = document.getElementById('delivery-map-loader');
     if (loader) {
@@ -383,7 +371,6 @@ function initPickupMap(){
     });
     
     let selectedStoreMarker = null;
-    const typeToDeliveryBtn = document.getElementById('order-type-delivery');
 
     function selectPickupStore(storeId, address, marker, index) {
         fetchWithRetry('src/saveDeliveryAddress.php', {
@@ -425,6 +412,7 @@ function initPickupMap(){
     }
 
     function clearPickupMap() {
+        // стандартные балуны
         if (selectedStoreMarker) {
             selectedStoreMarker.options.set({
                 iconImageHref: '/img/custom_map_pin.png'
@@ -432,7 +420,17 @@ function initPickupMap(){
             selectedStoreMarker = null;
         }
 
+        // сбрасываем карту к центру
         map.setCenter([55.76, 37.64], 8);
+
+        // Сбрасываем все кнопки выбора магазина
+        document.querySelectorAll('[id^="select-pickup-store-"]').forEach(btn => {
+            btn.textContent = 'Заберу отсюда';
+            btn.style.cursor = 'pointer';
+            btn.style.pointerEvents = 'auto';
+            btn.disabled = false;
+            btn.removeAttribute('data-listener-added');
+        });
     }
     
     // Загружаем магазины из БД
@@ -503,15 +501,6 @@ function initPickupMap(){
     .catch(error => {
         console.error('Ошибка загрузки магазинов:', error);
     });
-
-    // Обработчик кнопки переключения типа (с доставки на самовывоз)
-    if (typeToDeliveryBtn) {
-        typeToDeliveryBtn.addEventListener('click', function() {
-            if (!typeToDeliveryBtn.classList.contains('chosen')) {
-                clearPickupMap();
-            }
-        });
-    }
 
     // Плавно убираем лоадер
     const loader = document.getElementById('pickup-map-loader');

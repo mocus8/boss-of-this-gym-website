@@ -101,124 +101,173 @@ async function getRecaptchaToken(form) {
     return await grecaptcha.execute(siteKey, {action: 'submit'});
 }
 
-// крутой объект через IIFE для универсальной модалки в хедере с текстом
-const HeaderModal = (function() {
-    let closeTimer = null;
-    let modal, text, progress, closeBtn;
+// крутой класс через ES6 для универсальной модалки в хедере с текстом
+// Singleton паттерн - гарантируем один экземпляр (будет создан всего один объект класса)
+class HeaderModal {
+    // static поля - общие для ВСЕХ объектов класса
+    static #instance = null;
 
-    function init() {
-        modal = document.getElementById('header-modal');
-        text = document.getElementById('header-modal-text');
-        progress = document.getElementById('header-modal-progress-fill');
-        closeBtn = document.getElementById('header-modal-close');
+    #closeTimer = null;
+    #modal = null;
+    #text = null;
+    #progress = null;
+    #closeBtn = null;
 
-        if (!modal || !text || !progress || !closeBtn) {
+    constructor() {
+        // если уже есть экземпляр класса то просто возвращаем его
+        if (HeaderModal.#instance) {
+            return HeaderModal.#instance;
+        }
+
+        // Автоинициализация при загрузке
+        if (document.readyState === 'loading') {
+            // стрелочная функция берет переменные (и this) и работает с ними для ЭТОГО созданного объекта
+            // this берет переменные из ЭТОГО созданного объекта
+            document.addEventListener('DOMContentLoaded', () => this.#init());
+        } else {
+            // тут # т.к. init - приватный метод
+            this.#init();
+        }
+
+        // сохраняем единственный instance (экземпляр)
+        HeaderModal.#instance = this;
+    }
+
+    #init() {
+        this.#modal = document.getElementById('header-modal');
+        this.#text = document.getElementById('header-modal-text');
+        this.#progress = document.getElementById('header-modal-progress-fill');
+        this.#closeBtn = document.getElementById('header-modal-close');
+
+        if (!this.#modal || !this.#text || !this.#progress || !this.#closeBtn) {
+            // тут потом правильное логирование
             console.error('Modal elements not found');
             return;
         }
 
-        closeBtn.addEventListener('click', close);
+        this.#closeBtn.addEventListener('click', () => this.close());
     }
 
-    function open(innerText) {
-        if (!modal) return;
+    open(innerText) {
+        if (!this.#modal) return;
 
-        close();
+        this.close();
 
-        text.textContent = innerText;
-        modal.classList.remove("hidden");
+        this.#text.textContent = innerText;
+        this.#modal.classList.remove("hidden");
 
-        progress.classList.remove("shrinking");
-        // Принудительный reflow, гарантируем что анимация перезапуститься
-        void progress.offsetWidth;
-        progress.classList.add("shrinking");
+        // Сброс и запуск анимации прогресса
+        this.#progress.classList.remove("shrinking");
+        void this.#progress.offsetWidth; // Принудительный reflow, гарантируем что анимация перезапуститься
+        this.#progress.classList.add("shrinking");
 
-       closeTimer = setTimeout(close, 5000);
+        // Таймер автоскрытия
+        this.#closeTimer = setTimeout(() => this.close(), 5000);
     }
 
-    function close() {
-        if (!modal) return;
+    close() {
+        if (!this.#modal) return;
 
-        modal.classList.add("hidden");
-        progress.classList.remove("shrinking");
+        this.#modal.classList.add("hidden");
+        this.#progress.classList.remove("shrinking");
 
-        if(text) text.textContent = '';
+        if (this.#text) this.#text.textContent = '';
+        if (this.#closeTimer) clearTimeout(this.#closeTimer);
 
-        if (closeTimer) clearTimeout(closeTimer);
+        this.#closeTimer = null;
+    }
+}
+// создаем объект класса
+const headerModal = new HeaderModal();
 
-        closeTimer = null;
+// крутой класс через ES6 для управления SMS таймерами 
+// Singleton паттерн - гарантируем один экземпляр (будет создан всего один объект класса)
+class SmsTimerManager {
+    // static поля - общие для ВСЕХ объектов класса
+    static #instance = null;
+
+    #resendTimer = null;
+    #resendTimeLeft = 0;
+    #smsFirstCodeButton = null;
+    #smsRetryCodeButton = null;
+    #timerSpans = null;
+
+    constructor() {
+        // если уже есть экземпляр класса то просто возвращаем его
+        if (SmsTimerManager.#instance) {
+            return SmsTimerManager.#instance;
+        }
+
+        // Автоинициализация при загрузке
+        if (document.readyState === 'loading') {
+            // стрелочная функция берет переменные (и this) и работает с ними для ЭТОГО созданного объекта
+            // this берет переменные из ЭТОГО созданного объекта
+            document.addEventListener('DOMContentLoaded', () => this.#init());
+        } else {
+            // тут # т.к. init - приватный метод
+            this.#init();
+        }
+
+        // сохраняем единственный instance (экземпляр)
+        SmsTimerManager.#instance = this;
     }
 
-    // Автоинициализация при загрузке
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-    
-    // возвращаем функции для открытия и закрытия
-    return { open, close };
-})(); // () на конце выполняет сразу (для всех функций), и это исользуется все последующее разы
+    #init() {
+        this.#smsFirstCodeButton = document.getElementById('first-sms-code');
+        this.#smsRetryCodeButton = document.getElementById('retry-sms-code');
+        this.#timerSpans = document.querySelectorAll(`[data-action="retry-sms-code-timer"]`);
 
-// крутой объект через IIFE для управления SMS таймерами 
-const SmsTimerManager = (function() {
-    let resendTimer = null;
-    let resendTimeLeft = 0;
-    let smsFirstCodeButton, smsRetryCodeButton, timerSpans;
-
-    function init() {
-        smsFirstCodeButton = document.getElementById('first-sms-code');
-        smsRetryCodeButton = document.getElementById('retry-sms-code');
-        timerSpans = document.querySelectorAll(`[data-action="retry-sms-code-timer"]`);
-
-        if (!smsFirstCodeButton || !smsRetryCodeButton || timerSpans.length === 0) {
+        if (!this.#smsFirstCodeButton || !this.#smsRetryCodeButton || this.#timerSpans.length === 0) {
+            // тут потом правильное логирование
             console.error('Modal elements not found');
             return;
         }
     }
 
     //запуск таймера повторной отправки
-    function startResendTimer(seconds = 60) {
-        resendTimeLeft = seconds;
+    startResendTimer(seconds = 60) {
+        this.#resendTimeLeft = seconds;
         
         // Блокируем кнопки сразу
-        smsFirstCodeButton.disabled = true;
-        smsRetryCodeButton.disabled = true;
+        this.#smsFirstCodeButton.disabled = true;
+        this.#smsRetryCodeButton.disabled = true;
         
-        resendTimer = setInterval(() => {
-            resendTimeLeft--;
+        this.#resendTimer = setInterval(() => {
+            this.#resendTimeLeft--;
             
-            if (resendTimeLeft <= 0) {
-                clearInterval(resendTimer);
-                smsFirstCodeButton.disabled = false;
-                smsRetryCodeButton.disabled = false;
-                timerSpans.forEach(span => {
+            if (this.#resendTimeLeft <= 0) {
+                clearInterval(this.#resendTimer);
+                this.#resendTimer = null;
+                this.#smsFirstCodeButton.disabled = false;
+                this.#smsRetryCodeButton.disabled = false;
+                this.#timerSpans.forEach(span => {
                     span.textContent = ``;
                 });
+            
             } else {
-                timerSpans.forEach(span => {
-                    span.textContent = `(${resendTimeLeft}с)`;
+                this.#timerSpans.forEach(span => {
+                    span.textContent = `(${this.#resendTimeLeft}с)`;
                 });
             }
         }, 1000);
     }
 
     //остановка таймера повторной отправки
-    function clearResendTimer() {
-        if (resendTimer) {
-            clearInterval(resendTimer);
-            resendTimer = null;
-            resendTimeLeft = 0;
+    clearResendTimer() {
+        if (this.#resendTimer) {
+            clearInterval(this.#resendTimer);
+            this.#resendTimer = null;
+            this.#resendTimeLeft = 0;
 
-            timerSpans.forEach(span => {
+            this.#timerSpans.forEach(span => {
                 span.textContent = ``;
             });
         }
     }
 
     //запуск таймера блокировки 
-    function startUnlockTimer(blockedUntilTimestamp) {
-        clearResendTimer();
+    startUnlockTimer(blockedUntilTimestamp) {
+        this.clearResendTimer();
         
         const interval = setInterval(() => {
             const now = Math.floor(Date.now() / 1000);
@@ -229,17 +278,9 @@ const SmsTimerManager = (function() {
             }
         }, 1000);
     }
+}
 
-    // Автоинициализация при загрузке
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-    
-    // возвращаем функции для открытия и закрытия
-    return { startResendTimer, clearResendTimer,  startUnlockTimer};
-})(); // () на конце выполняет сразу (для всех функций), и это исользуется все последующее разы
+const smsTimerManager = new SmsTimerManager();
 
 // проверка на блок по попыткам
 async function isAttemptsBlocked() {
@@ -254,8 +295,8 @@ async function isAttemptsBlocked() {
         }
 
         if (result.error === 'blocked') {
-            SmsTimerManager.clearResendTimer();
-            SmsTimerManager.startUnlockTimer(result.blocked_until);
+            smsTimerManager.clearResendTimer();
+            smsTimerManager.startUnlockTimer(result.blocked_until);
 
             incorrectSmsCodeModal.querySelector('.error_modal_text').textContent = `Система заблокирована до ${new Date(result.blocked_until * 1000).toLocaleTimeString()}`;
             incorrectSmsCodeModal.classList.add('open');
@@ -392,9 +433,9 @@ async function sendSmsCode() {
         //это для теста без реальных sms, потом убрать!!!
         alert(`смски дорогие, пока так (но функционал для реальных смс уже есть) Код подтверждения: ${result.debug_code}, был бы отправлен на номер ${result.debug_phone}`);
 
-        HeaderModal.open('SMS-код был отправлен на указанный номер');
+        headerModal.open('SMS-код был отправлен на указанный номер');
 
-        SmsTimerManager.startResendTimer(30);
+        smsTimerManager.startResendTimer(30);
     } catch (error) {
         if (smsFirstCodeButton.classList.contains('hidden')) {
             toggleSmsCodeState();
@@ -446,7 +487,7 @@ async function confirmSmsCode() {
         const result = await parseResponse(response);
 
         if (result.error === 'blocked') {
-            SmsTimerManager.startUnlockTimer(result.blocked_until);
+            smsTimerManager.startUnlockTimer(result.blocked_until);
             smsFirstCodeButton.disabled = false;
             smsRetryCodeButton.disabled = false;
             throw new Error(`Система заблокирована до ${new Date(result.blocked_until * 1000).toLocaleTimeString()}`);
@@ -456,7 +497,7 @@ async function confirmSmsCode() {
             throw new Error(result.error || result.message || `Ошибка ${response.status}! Попробуйте еще раз`);
         }
 
-        SmsTimerManager.clearResendTimer();
+        smsTimerManager.clearResendTimer();
 
         phoneNumberInput.value = validatePhoneNumber(phoneNumberInput.value).formatted;
         phoneNumberInput.readOnly = true;
@@ -688,7 +729,7 @@ document.querySelector('.authorization_modal_form').addEventListener('submit', f
     const phoneValidation = validatePhoneNumber(phoneNumberInput.value);
 
     if (!phoneValidation.isValid) {
-        HeaderModal.open('Неправильный формат номера');
+        headerModal.open('Неправильный формат номера');
         return;
     }
     

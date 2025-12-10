@@ -7,38 +7,63 @@ function clearOrderInterface(previousType) {
         document.getElementById('modal-error-address-empty').classList.remove('open');
         document.getElementById('modal-error-address-not-found').classList.remove('open');
         document.getElementById('modal-error-address-timeout').classList.remove('open');
-        PayErrorModal.close();
+        payErrorModal.close();
+
+        // очищаем карту доставки
+        clearDeliveryMap();
+
     } else {
         // Очищаем интерфейс самовывоза
         document.getElementById('order-right-pickup-address').textContent = 'не указан';
-        
-        // Сбрасываем все кнопки выбора магазина
-        document.querySelectorAll('[id^="select-pickup-store-"]').forEach(btn => {
-            btn.textContent = 'Заберу отсюда';
-            btn.style.cursor = 'pointer';
-            btn.style.pointerEvents = 'auto';
-            btn.disabled = false;
-            btn.removeAttribute('data-listener-added');
-        });
+
+        // очищаем карту самовывоза
+        clearPickupMap();
     }
 }
 
-// крутой объект через IIFE для универсальной модалки ошибки оплаты с текстом
-const PayErrorModal = (function() {
-    let deliveryModal, pickupModal, deliveryModalText, pickupModalText;
+// крутой класс через ES6 для универсальной модалки ошибки оплаты с текстом
+// Singleton паттерн - гарантируем один экземпляр (будет создан всего один объект класса)
+class PayErrorModal {
+    // static поля - общие для ВСЕХ объектов класса
+    static #instance = null;
 
-    function init() {
-        deliveryModal = document.getElementById('error-pay-delivery');
-        pickupModal = document.getElementById('error-pay-pickup');
-        deliveryModalText = document.getElementById('error-pay-delivery-text');
-        pickupModalText = document.getElementById('error-pay-pickup-text');
+    #deliveryModal = null;
+    #pickupModal = null;
+    #deliveryModalText = null;
+    #pickupModalText = null;
 
-        if (!deliveryModal || !pickupModal || !deliveryModalText || !pickupModalText) {
+    constructor() {
+        // если уже есть экземпляр класса то просто возвращаем его
+        if (PayErrorModal.#instance) {
+            return PayErrorModal.#instance;
+        }
+
+        // Автоинициализация при загрузке
+        if (document.readyState === 'loading') {
+            // стрелочная функция берет переменные (и this) и работает с ними для ЭТОГО созданного объекта
+            // this берет переменные из ЭТОГО созданного объекта
+            document.addEventListener('DOMContentLoaded', () => this.#init());
+        } else {
+            // тут # т.к. init - приватный метод
+            this.#init();
+        }
+
+        // сохраняем единственный instance (экземпляр)
+        PayErrorModal.#instance = this;
+    }
+
+    #init() {
+        this.#deliveryModal = document.getElementById('error-pay-delivery');
+        this.#pickupModal = document.getElementById('error-pay-pickup');
+        this.#deliveryModalText = document.getElementById('error-pay-delivery-text');
+        this.#pickupModalText = document.getElementById('error-pay-pickup-text');
+
+        if (!this.#deliveryModal || !this.#pickupModal || !this.#deliveryModalText || !this.#pickupModalText) {
             console.error('Modal elements not found');
             return;
         }
 
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', (e) => {
             // закрывается при нажатии НЕ на кнопку и НЕ на модалку, чтобы не закрывалась сразу
             if (e.target.classList.contains('order_right_pay_button')) {
                 return;
@@ -47,53 +72,44 @@ const PayErrorModal = (function() {
                 return;
             }
         
-            close();
+            this.close();
         });
     }
 
-    function open(innerText) {
+    open(innerText) {
         // определяем выбранный тип тут, динамически
         const isDelivery = document.getElementById('order-type-delivery').classList.contains('chosen');
 
         // открытие для случая доставки
         if (isDelivery) {
-            if (!deliveryModal) return;
+            if (!this.#deliveryModal) return;
 
-            close();
+            this.close();
 
-            deliveryModalText.textContent = innerText;
-            deliveryModal.classList.remove("hidden");
+            this.#deliveryModalText.textContent = innerText;
+            this.#deliveryModal.classList.remove("hidden");
 
         } else {
             // открытие для случая самовывоза
+            if (!this.#pickupModal) return;
 
-            if (!pickupModal) return;
+            this.close();
 
-            close();
-
-            pickupModalText.textContent = innerText;
-            pickupModal.classList.remove("hidden");
+            this.#pickupModalText.textContent = innerText;
+            this.#pickupModal.classList.remove("hidden");
         }
     }
 
-    function close() {
-        if (deliveryModal) deliveryModal.classList.add("hidden");
-        if (pickupModal) pickupModal.classList.add("hidden");
+    close() {
+        if (this.#deliveryModal) this.#deliveryModal.classList.add("hidden");
+        if (this.#pickupModal) this.#pickupModal.classList.add("hidden");
 
-        if(deliveryModalText) deliveryModalText.textContent = '';
-        if(pickupModalText) pickupModalText.textContent = '';
+        if(this.#deliveryModalText) this.#deliveryModalText.textContent = '';
+        if(this.#pickupModalText) this.#pickupModalText.textContent = '';
     }
-
-    // Автоинициализация при загрузке
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-    
-    // возвращаем функции для открытия и закрытия
-    return { open, close };
-})(); // () на конце выполняет сразу (для всех функций), и это исользуется все последующее разы
+}
+// создаем объект класса
+const payErrorModal = new PayErrorModal();
 
 // Функция обновления типа доставки в БД
 function updateDeliveryTypeInDB(deliveryType) {
@@ -159,20 +175,29 @@ document.querySelector('.order_types').addEventListener('click', function(e) {
 document.querySelectorAll('.order_right_pay_button').forEach(button => {
     button.addEventListener('click', async function() {
         const orderId = this.getAttribute('data-order-id');
-        const deliveryAddress = document.getElementById('order-right-delivery-address').innerText;
-        const pickupAddress = document.getElementById('order-right-pickup-address').innerText;
+        const isDelivery = document.getElementById('order-type-delivery').classList.contains('chosen');
+        const deliveryAddress = document.getElementById('order-right-delivery-address').textContent ;
+        const pickupAddress = document.getElementById('order-right-pickup-address').textContent;
         const originalText = button.textContent;
 
         // сброс предыдущих ошибок адреса
-        PayErrorModal.close();
+        payErrorModal.close();
 
         // блокируем кнопку на время выполнения скрипта
         button.disabled = true;
         button.textContent = 'Создаем платеж...';
 
-        // проверка на отсутствие адреса получения (самовывоза или доставки)
-        if (deliveryAddress.includes("не указан") || pickupAddress.includes("не указан")) {
-            PayErrorModal.open('Укажите адрес получения.');
+        // проверка на отсутствие адреса доставки если доставка
+        if (isDelivery && deliveryAddress.includes("не указан")) {
+            payErrorModal.open('Укажите адрес доставки.');
+
+            button.disabled = false;
+            button.textContent = originalText;
+
+            return;
+        } else if (!isDelivery && pickupAddress.includes("не указан")) {
+            // проверка на отсутствие магазина доставки если самовывоз
+            payErrorModal.open('Укажите магазин для самовывоза.');
 
             button.disabled = false;
             button.textContent = originalText;
@@ -197,7 +222,7 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
             try {
                 result = await response.json();
             } catch (jsonError) {
-                PayErrorModal.open('Некорректный ответ от сервера.');
+                payErrorModal.open('Некорректный ответ от сервера.');
                 return;
             }
                             
