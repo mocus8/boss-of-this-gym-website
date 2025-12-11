@@ -81,28 +81,18 @@ function initStoresMap(){
     }
 }
 
-// Класс через ES6 для карты доставки
-function initDeliveryMap(){
-    // защита от повторного вызова
-    const container = document.getElementById('delivery-map');
-    if (!container) return; 
-    
-    if (container.children.length > 0) {
-        return;
-    }
-
-    const map = new ymaps.Map('delivery-map', { 
-        center: [55.76, 37.64], 
-        zoom: 10,
-        controls: ['zoomControl']
-    });
-    
-    let marker = null;
-    const addressInput = document.getElementById('delivery-address');
-    const searchBtn = document.getElementById('delivery-search-btn');
+// Класс через ES6 для карты доставки с параметром (контейнер для создания внем карты)
+class DeliveryMap {
+    #map = null; // объект Яндекс.Карты
+    #containerId = null; // id контейнера в котором создаем карту
+    #marker = null; // текущий маркер адреса
+    #addressInput = null; // input ввода адреса
+    #searchBtn = null; // кнопка поиска
+    #isInitialized = false; // флаг создания карты
+    #daDataInitialized = false; // флаг инициализации DaData
 
     // Санитизация ввода
-    function sanitizeAddress(address) {
+    #sanitizeAddress(address) {
         return address
             .replace(/[<>"`\\\/]/g, '') // Удаляем самые опасные
             .replace(/'/g, '’')         // Заменяем апостроф на красивый
@@ -112,100 +102,24 @@ function initDeliveryMap(){
             .substring(0, 200); // Ограничить длину
     }
 
-    // Обработка адреса
-    function processAddress(address) {
-        // Скрываем все ошибки адреса
-        document.getElementById('modal-error-address-empty').classList.remove('open');
-        document.getElementById('modal-error-address-not-found').classList.remove('open');
-        document.getElementById('modal-error-address-timeout').classList.remove('open');
-
-        if (!address.trim()) {
-            setTimeout(() => {
-                document.getElementById('modal-error-address-empty').classList.add('open');
-            }, 10);
-            return;
-        }
-
-        if (searchBtn) {
-            searchBtn.disabled = true;
-            searchBtn.textContent = 'Поиск...';
-        }
-        
-        const normalizedAddress = address.replace(/[.,]/g, '').replace(/\s+/g, ' ').trim();
-        
-        // ФЛАГ ТАЙМАУТА - ДОБАВЛЯЕМ ЭТУ ПЕРЕМЕННУЮ
-        let isGeocodeTimedOut = false;
-        
-        // ДОБАВЛЯЕМ ТАЙМАУТ
-        const geocodeTimeout = setTimeout(() => {
-            console.error('Таймаут геокодирования');
-            isGeocodeTimedOut = true; // УСТАНАВЛИВАЕМ ФЛАГ
-            if (searchBtn) {
-                searchBtn.disabled = false;
-                searchBtn.textContent = 'Найти';
-            }
-            // Показываем ошибку таймаута
-            document.getElementById('modal-error-address-timeout').classList.add('open');
-        }, 10000); // время таймаута - 10 сек 
-        
-        ymaps.geocode(normalizedAddress).then(function(res) {
-            // ПРОВЕРЯЕМ ФЛАГ - ЕСЛИ ТАЙМАУТ УЖЕ СРАБОТАЛ, ВЫХОДИМ
-            if (isGeocodeTimedOut) {
-                return;
-            }
-            
-            clearTimeout(geocodeTimeout); // ОЧИЩАЕМ ТАЙМАУТ ПРИ УСПЕХЕ
-            
-            const firstResult = res.geoObjects.get(0);
-            
-            if (!firstResult) {
-                setTimeout(() => {
-                    document.getElementById('modal-error-address-not-found').classList.add('open');
-                }, 10);
-                if (searchBtn) {
-                    searchBtn.disabled = false;
-                    searchBtn.textContent = 'Найти';
-                }
-                return;
-            }
-
-            showAddressOnMap(firstResult);
-            if (searchBtn) {
-                searchBtn.disabled = false;
-                searchBtn.textContent = 'Найти';
-            }
-        }).catch(error => {
-            // ПРОВЕРЯЕМ ФЛАГ - ЕСЛИ ТАЙМАУТ УЖЕ СРАБОТАЛ, ВЫХОДИМ
-            if (isGeocodeTimedOut) {
-                return;
-            }
-            
-            clearTimeout(geocodeTimeout); // ОЧИЩАЕМ ТАЙМАУТ ПРИ ОШИБКЕ
-            console.error('Ошибка геокодирования:', error);
-            if (searchBtn) {
-                searchBtn.disabled = false;
-                searchBtn.textContent = 'Найти';
-            }
-            // При других ошибках тоже показываем таймаут
-            document.getElementById('modal-error-address-timeout').classList.add('open');
-        });
-    }
-
     // Показать адрес на карте
-    function showAddressOnMap(geoObject) {
+    #showAddressOnMap(geoObject) {
+        if (!this.#isInitialized) return;
+
         const coords = geoObject.geometry.getCoordinates();
         const address = geoObject.getAddressLine();
         const postalCode = geoObject.properties.get('metaDataProperty.GeocoderMetaData.Address.postal_code');
         
-        if (marker) {
-            map.geoObjects.remove(marker);
+        // если уже есть какой-то маркер то убираем его
+        if (this.#marker) {
+            this.#map.geoObjects.remove(this.#marker);
         }
         
-        marker = new ymaps.Placemark(coords, {
+        this.#marker = new ymaps.Placemark(coords, {
             balloonContent: `
                 <div style="min-width: 250px; font-size: 120% !important; font-family: 'Jost', Arial !important;">
                     <strong>Адрес доставки:</strong><br>
-                    ${sanitizeAddress(address.replace(/^Россия,\s*/, ''))}
+                    ${this.#sanitizeAddress(address.replace(/^Россия,\s*/, ''))}
                     <div style="margin-top: 5%; text-align: center;">
                         <button id="select-delivery-address" 
                                 style="border: 0.15vw solid black; padding: 3% 5%; padding-left: 2%; border-radius: 0.5vw; cursor: pointer; 
@@ -221,13 +135,16 @@ function initDeliveryMap(){
             balloonAutoPan: true
         });
         
-        map.geoObjects.add(marker);
-        map.setCenter(coords, 16);
+        this.#map.geoObjects.add(this.#marker);
+        this.#map.setCenter(coords, 16);
         
-    // Обработчик события открытия балуна
-        marker.events.add('balloonopen', function() {
-            const currentAddress = document.getElementById('order-right-delivery-address').innerText;
-            const cleanAddress = sanitizeAddress(address.replace(/^Россия,\s*/, ''));
+        // Обработчик события открытия балуна
+        this.#marker.events.add('balloonopen', () => {
+            const addressEl = document.getElementById('order-right-delivery-address');
+            const currentAddress = addressEl ? addressEl.innerText : '';
+
+            const cleanAddress = this.#sanitizeAddress(address.replace(/^Россия,\s*/, ''));
+            // проверка на то что текущий адресс и выбранный адресс одинаковы
             const isSelected = currentAddress === cleanAddress;
             
             // Мгновенно обновляем кнопку если адрес выбран
@@ -241,14 +158,21 @@ function initDeliveryMap(){
                         selectBtn.disabled = true;
                     }
                 }, 0); // Минимальная задержка
+
             } else {
                 // Обычная логика для невыбранного адреса
                 setTimeout(() => {
                     const selectBtn = document.getElementById('select-delivery-address');
                     if (selectBtn && !selectBtn.hasAttribute('data-listener-added')) {
                         selectBtn.setAttribute('data-listener-added', 'true');
-                        selectBtn.addEventListener('click', function() {
-                            const cleanAddress = sanitizeAddress(address.replace(/^Россия,\s*/, ''));
+                        selectBtn.addEventListener('click', () => {
+                            const cleanAddress = this.#sanitizeAddress(address.replace(/^Россия,\s*/, ''));
+
+                            // проверка на наличие fetchWithRetry
+                            if (typeof fetchWithRetry !== 'function') {
+                                console.error('[DeliveryMap] fetchWithRetry не определена');
+                                return;
+                            }
                             
                             fetchWithRetry('src/saveDeliveryAddress.php', {
                                 method: 'POST',
@@ -270,90 +194,278 @@ function initDeliveryMap(){
             }
         });
         
-        marker.balloon.open();
+        this.#marker.balloon.open();
     }
 
-    function clearDeliveryMap() {
-        map.geoObjects.remove(marker);
-        map.setCenter([55.76, 37.64], 8);
-    };
-    
-    // старый код, кастомные подсказки без dadata
-    // const suggestionsContainer = document.createElement('div');
-    // suggestionsContainer.className = 'address-suggestions';
+    // Обработка адреса
+    #processAddress(address) {
+        // Скрываем все ошибки адреса
+        document.getElementById('modal-error-address-empty')?.classList.remove('open');
+        document.getElementById('modal-error-address-not-found')?.classList.remove('open');
+        document.getElementById('modal-error-address-timeout')?.classList.remove('open');
 
-    // function showSuggestions(suggestions) {
-    //     clearSuggestions();
-        
-    //     if (suggestions.length === 0) return;
-        
-    //     suggestions.forEach((item, index) => {
-    //         const div = document.createElement('div');
-    //         div.className = 'suggestion-item';
-    //         div.textContent = formatAddress(item.getAddressLine());
-            
-    //         div.addEventListener('click', function() {
-    //             selectSuggestion(item);
-    //         });
-            
-    //         suggestionsContainer.appendChild(div);
-    //     });
-        
-    //     suggestionsContainer.style.display = 'block';
-    //     addressInput.classList.add('has-suggestions');
-    // }
+        // показываем ошибку если input адреса пустой
+        if (!address.trim()) {
+            setTimeout(() => {
+                document.getElementById('modal-error-address-empty')?.classList.add('open');
+            }, 10);
+            return;
+        }
 
-    //ИНИЦИАЛИЗАЦИЯ DADATA
-    if (addressInput) {
-        fetch('src/serviceProxy.php')
+        if (this.#searchBtn) {
+            this.#searchBtn.disabled = true;
+            this.#searchBtn.textContent = 'Поиск...';
+        }
+                
+        // добавляем таймаут на поиск адреса
+        let isGeocodeTimedOut = false;
+        const geocodeTimeout = setTimeout(() => {
+            console.error('[DeliveryMap] Таймаут геокодирования');
+            isGeocodeTimedOut = true; // устанавливаем флаг таймаута
+            if (this.#searchBtn) {
+                this.#searchBtn.disabled = false;
+                this.#searchBtn.textContent = 'Найти';
+            }
+            // Показываем ошибку таймаута
+            document.getElementById('modal-error-address-timeout')?.classList.add('open');
+        }, 10000); // время таймаута - 10 сек 
+
+        const normalizedAddress = address.replace(/[.,]/g, '').replace(/\s+/g, ' ').trim();
+        ymaps.geocode(normalizedAddress).then((res) => {
+            // если таймаут сработал то выходим
+            if (isGeocodeTimedOut) {
+                return;
+            }
+            
+            clearTimeout(geocodeTimeout); // очищаем таймаут при успехе
+            
+            // если нет результата то ошибку
+            const firstResult = res.geoObjects.get(0);
+            if (!firstResult) {
+                setTimeout(() => {
+                    document.getElementById('modal-error-address-not-found')?.classList.add('open');
+                }, 10);
+                if (this.#searchBtn) {
+                    this.#searchBtn.disabled = false;
+                    this.#searchBtn.textContent = 'Найти';
+                }
+                return;
+            }
+
+            // показываем на карте
+            this.#showAddressOnMap(firstResult);
+
+            if (this.#searchBtn) {
+                this.#searchBtn.disabled = false;
+                this.#searchBtn.textContent = 'Найти';
+            }
+
+        }).catch(error => {
+            // если таймаут сработал то выходим
+            if (isGeocodeTimedOut) {
+                return;
+            }
+            
+            clearTimeout(geocodeTimeout); // очищаем таймаут при ошибки
+            console.error('Ошибка геокодирования:', error);
+            if (this.#searchBtn) {
+                this.#searchBtn.disabled = false;
+                this.#searchBtn.textContent = 'Найти';
+            }
+            // При других ошибках тоже показываем таймаут
+            document.getElementById('modal-error-address-timeout')?.classList.add('open');
+        });
+    }
+
+    // Навешиваем обработчики на кнопки и поля
+    #setupEvents() {
+        // Обработчик кнопки "Найти"
+        if (this.#searchBtn) {
+            this.#searchBtn.addEventListener('click', () => {
+                this.#processAddress(this.#sanitizeAddress(this.#addressInput.value));
+            });
+        }
+
+        // Обработчик кнопки Enter на input адреса
+        if (this.#addressInput) {
+            this.#addressInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.#processAddress(this.#sanitizeAddress(this.#addressInput.value));
+                }
+            });
+        }
+    }
+
+    // инициализация DaData
+    #initDaData() {
+        if (this.#daDataInitialized) return;
+
+        if (this.#addressInput) {
+            fetch('src/serviceProxy.php')
             .then(response => response.json())
             .then(data => {
                 if (data.key && window.Dadata) {
                     // Используем стандартный виджет DaData
-                    window.Dadata.createSuggestions(addressInput, {
+                    window.Dadata.createSuggestions(this.#addressInput, {
                         token: data.key,
                         type: "address",
                         count: 5
                     });
                     
+                    const container = document.getElementById(this.#containerId);
+                    if (!container) return;
+
                     // Обработчик выбора подсказки
-                    document.addEventListener('click', function(e) {
+                    container.addEventListener('click', (e) => {
                         let target = e.target;
                         while (target && target !== document.body) {
                             if (target.classList && target.classList.contains('suggestions-suggestion')) {
                                 setTimeout(() => {
-                                    processAddress(addressInput.value);
+                                    this.#processAddress(this.#addressInput.value);
                                 }, 100);
+
                                 break;
                             }
+
                             target = target.parentElement;
                         }
                     });
+
+                    this.#daDataInitialized = true;
                 }
             })
             .catch(error => {
                 console.error('Ошибка загрузки ключа DaData:', error);
             });
+        }
+
+        // старый код, кастомные подсказки без dadata
+
+        // const suggestionsContainer = document.createElement('div');
+        // suggestionsContainer.className = 'address-suggestions';
+
+        // function showSuggestions(suggestions) {
+        //     clearSuggestions();
+            
+        //     if (suggestions.length === 0) return;
+            
+        //     suggestions.forEach((item, index) => {
+        //         const div = document.createElement('div');
+        //         div.className = 'suggestion-item';
+        //         div.textContent = formatAddress(item.getAddressLine());
+                
+        //         div.addEventListener('click', function() {
+        //             selectSuggestion(item);
+        //         });
+                
+        //         suggestionsContainer.appendChild(div);
+        //     });
+            
+        //     suggestionsContainer.style.display = 'block';
+        //     addressInput.classList.add('has-suggestions');
+        // }
     }
 
-    // Обработчик кнопки "Найти"
-    if (searchBtn) {
-        searchBtn.addEventListener('click', function() {
-            processAddress(sanitizeAddress(addressInput.value));
-        });
+    // Метод убирания лоадера
+    #hideLoader() {
+        // Плавно убираем лоадер
+        const loader = document.getElementById('delivery-map-loader');
+        if (loader) {
+            loader.style.opacity = '0';
+            loader.style.visibility = 'hidden';
+            // Через время завершения анимации - полностью убираем
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 200); // Время должно совпадать с transition (0.4s)
+        }
     }
 
-    // Плавно убираем лоадер
-    const loader = document.getElementById('delivery-map-loader');
-    if (loader) {
-        loader.style.opacity = '0';
-        loader.style.visibility = 'hidden';
-        // Через время завершения анимации - полностью убираем
-        setTimeout(() => {
-            loader.style.display = 'none';
-        }, 200); // Время должно совпадать с transition (0.4s)
+    // инициализация (настройка объекта)
+    #initialize() {
+        // Приватный метод инициализации
+        this.#setupEvents();
+        this.#initDaData();
+        this.#hideLoader();
+
+        this.#isInitialized = true;
+    }
+
+    // конструктор с параметром, в параметре id контейнера для карты (например 'delivery-map')
+    constructor(containerId) {
+        try {
+            this.#containerId = containerId;
+
+            // защита от повторного вызова
+            const container = document.getElementById(containerId);
+            if (!container || container.children.length > 0) {
+                return;
+            }
+
+            this.#addressInput = document.getElementById('delivery-address');
+            this.#searchBtn = document.getElementById('delivery-search-btn');
+            if (!this.#addressInput || !this.#searchBtn) {
+                return;
+            }
+
+
+            this.#map = new ymaps.Map(containerId, { 
+                center: [55.76, 37.64], 
+                zoom: 10,
+                controls: ['zoomControl']
+            });
+
+            // настраиваем (сразу запускаем нужные методы)
+            this.#initialize();
+        } catch (error) {
+            console.error('[DeliveryMap] Ошибка инициализации:', error);
+            showMapError('delivery');
+            this.#isInitialized = false;
+        }
+    }
+
+    // очистка карты
+    clearDeliveryMap() {
+        if (!this.#isInitialized) {
+            // тут номрмальное логирование потом
+            console.error('[DeliveryMap] Карта не инициализирована');
+            return;
+        }
+
+        if (this.#marker) {
+            this.#map.geoObjects.remove(this.#marker);
+            this.#marker = null;
+        }
+
+        this.#map.setCenter([55.76, 37.64], 8);
+    };
+
+    // удаление карты
+    destroy() {
+        if (!this.#isInitialized) {
+            // тут номрмальное логирование потом
+            console.error('[DeliveryMap] Карта не инициализирована');
+            return;
+        }
+
+        if (this.#map) {
+            this.#map.destroy(); // метод яндекс карт
+            this.#map = null;
+        }
+        
+        this.#marker = null;
+        this.#addressInput = null;
+        this.#searchBtn = null;
+        this.#isInitialized = false;
+    }
+
+    // Геттер для получения состояния карты (инициализирована ли)
+    get isInitialized() {
+        return this.#isInitialized;
     }
 }
+
+// объявляем переменную для карты (т.к. она одна на страницу)
+let deliveryMap = null;
 
 // Карта самовывоза
 function initPickupMap(){
@@ -536,8 +648,10 @@ if (typeof ymaps === 'undefined') {
         if (document.getElementById('delivery-map') && deliveryModal && !deliveryModal.classList.contains('hidden')) {
             ymaps.geocode('Москва', { results: 1 })
                 .then(() => {
-                    // API работает, инициализируем карту заказа
-                    initDeliveryMap();
+                    // создаем карту если ее нет
+                    if (!deliveryMap) {
+                        deliveryMap = new DeliveryMap('delivery-map');
+                    }
                 })
                 .catch(error => {
                     // API не работает

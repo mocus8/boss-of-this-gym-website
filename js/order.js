@@ -10,8 +10,9 @@ function clearOrderInterface(previousType) {
         payErrorModal.close();
 
         // очищаем карту доставки
-        clearDeliveryMap();
-
+        if (deliveryMap) {
+            deliveryMap.clearDeliveryMap();
+        }
     } else {
         // Очищаем интерфейс самовывоза
         document.getElementById('order-right-pickup-address').textContent = 'не указан';
@@ -156,10 +157,11 @@ document.querySelector('.order_types').addEventListener('click', function(e) {
 
     // инициализируем карты
     setTimeout(() => {
-        if (isDelivery) {
-            initDeliveryMap(); // Будет создана только один раз
-        } else {
-            initPickupMap();   // Будет создана только один раз
+        if (isDelivery && !deliveryMap) {
+            // создаем карту если ее нет
+            deliveryMap = new DeliveryMap('delivery-map');
+        } else if (!isDelivery && !pickupMap) {
+            initPickupMap();
         }
     }, 50);
     
