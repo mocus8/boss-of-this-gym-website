@@ -18,7 +18,9 @@ function clearOrderInterface(previousType) {
         document.getElementById('order-right-pickup-address').textContent = 'не указан';
 
         // очищаем карту самовывоза
-        clearPickupMap();
+        if (pickupMap) {
+            pickupMap.clearPickupMap();
+        }
     }
 }
 
@@ -161,7 +163,7 @@ document.querySelector('.order_types').addEventListener('click', function(e) {
             // создаем карту если ее нет
             deliveryMap = new DeliveryMap('delivery-map');
         } else if (!isDelivery && !pickupMap) {
-            initPickupMap();
+            pickupMap = new PickupMap('pickup-map');
         }
     }, 50);
     

@@ -86,10 +86,9 @@ function initStoresMap(){
     }
 }
 
-// Класс через ES6 для карты доставки с параметром (контейнер для создания внем карты)
+// Класс через ES6 для карты доставки, конструктор с параметром (контейнер для создания в нем карты)
 class DeliveryMap {
     #map = null; // объект Яндекс.Карты
-    #containerId = null; // id контейнера в котором создаем карту
     #marker = null; // текущий маркер адреса
     #addressInput = null; // input ввода адреса
     #searchBtn = null; // кнопка поиска
@@ -170,7 +169,7 @@ class DeliveryMap {
                     const selectBtn = document.getElementById('select-delivery-address');
                     if (selectBtn && !selectBtn.hasAttribute('data-listener-added')) {
                         selectBtn.setAttribute('data-listener-added', 'true');
-                        selectBtn.addEventListener('click', () => {
+                        selectBtn.addEventListener('click', async () => {
                             const cleanAddress = this.#sanitizeAddress(address.replace(/^Россия,\s*/, ''));
 
                             // проверка на наличие fetchWithRetry
@@ -179,20 +178,19 @@ class DeliveryMap {
                                 return;
                             }
                             
-                            fetchWithRetry('src/saveDeliveryAddress.php', {
+                            const data = await fetchWithRetry('src/saveDeliveryAddress.php', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({delivery_type: 'delivery', address: cleanAddress, postalCode: postalCode})
                             })
-                            .then(data => {
-                                if (data.success) {
-                                    selectBtn.textContent = '✅ Адрес выбран';
-                                    selectBtn.style.cursor = 'default';
-                                    selectBtn.style.pointerEvents = 'none';
-                                    selectBtn.disabled = true;
-                                    document.getElementById('order-right-delivery-address').innerText = cleanAddress;
-                                }
-                            });
+                        
+                            if (data.success) {
+                                selectBtn.textContent = '✅ Адрес выбран';
+                                selectBtn.style.cursor = 'default';
+                                selectBtn.style.pointerEvents = 'none';
+                                selectBtn.disabled = true;
+                                document.getElementById('order-right-delivery-address').innerText = cleanAddress;
+                            }
                         });
                     }
                 }, 100);
@@ -302,13 +300,18 @@ class DeliveryMap {
     }
 
     // инициализация DaData
-    #initDaData() {
-        if (this.#daDataInitialized) return;
+    async #initDaData() {
+        try {
+            if (this.#daDataInitialized) return;
 
-        if (this.#addressInput) {
-            fetch('src/serviceProxy.php')
-            .then(response => response.json())
-            .then(data => {
+            if (this.#addressInput) {
+                const response = await fetch('src/serviceProxy.php')
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
                 if (data.key && window.Dadata) {
                     // Используем стандартный виджет DaData
                     window.Dadata.createSuggestions(this.#addressInput, {
@@ -322,7 +325,7 @@ class DeliveryMap {
                     });
 
                     // // Кастомный обработчик выбора подсказки
-                    // const container = document.getElementById(this.#containerId);
+                    // const container = document.getElementById(containerId);
                     // if (!container) return;
                     // container.addEventListener('click', (e) => {
                     //     let target = e.target;
@@ -342,12 +345,10 @@ class DeliveryMap {
 
                     this.#daDataInitialized = true;
                 }
-            })
-            .catch(error => {
-                console.error('Ошибка загрузки ключа DaData:', error);
-            });
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки ключа DaData:', error);
         }
-
         // старый код, кастомные подсказки без dadata
 
         // const suggestionsContainer = document.createElement('div');
@@ -390,25 +391,40 @@ class DeliveryMap {
     }
 
     // инициализация (настройка объекта)
-    #initialize() {
-        // Приватный метод инициализации
-        this.#setupEvents();
-        this.#initDaData();
-        this.#hideLoader();
+    async #initialize() {
+        try {
+            // Приватный метод инициализации
+            this.#setupEvents();
+            await this.#initDaData();
+            this.#hideLoader();
 
-        this.#isInitialized = true;
+            this.#isInitialized = true;
+        } catch (error) {
+            console.error('[DeliveryMap] Ошибка инициализации:', error);
+            showMapError('delivery');
+            this.#isInitialized = false;
+
+            // Удаляем карту при ошибке
+            if (this.#map) {
+                this.#map.destroy();
+            }
+        }
     }
 
     // конструктор с параметром, в параметре id контейнера для карты (например 'delivery-map')
     constructor(containerId) {
         try {
-            this.#containerId = containerId;
+            // Проверка API Яндекса
+            if (!window.ymaps) {
+                throw new Error('Yandex Maps API не загружен');
+            }
+            if (!ymaps.Map || typeof ymaps.Map !== 'function') {
+                throw new Error('Yandex Maps API: Map не доступен');
+            }
 
             // защита от повторного вызова
             const container = document.getElementById(containerId);
-            if (!container || container.children.length > 0) {
-                return;
-            }
+            if (!container || container.children.length > 0) return; 
 
             this.#addressInput = document.getElementById('delivery-address');
             this.#searchBtn = document.getElementById('delivery-search-btn');
@@ -423,8 +439,11 @@ class DeliveryMap {
                 controls: ['zoomControl']
             });
 
-            // настраиваем (сразу запускаем нужные методы)
-            this.#initialize();
+            // инициализируем
+            this.#initialize().catch(() => {
+                // Пустой обработчик - ошибки уже обработаны внутри
+            });
+
         } catch (error) {
             console.error('[DeliveryMap] Ошибка инициализации:', error);
             showMapError('delivery');
@@ -445,7 +464,10 @@ class DeliveryMap {
             this.#marker = null;
         }
 
-        this.#map.setCenter([55.76, 37.64], 8);
+        // сбрасываем карту к центру
+        if (this.#map) {
+            this.#map.setCenter([55.76, 37.64], 8);
+        }
     };
 
     // удаление карты
@@ -460,11 +482,22 @@ class DeliveryMap {
             this.#map.destroy(); // метод яндекс карт
             this.#map = null;
         }
+
+        // Удаляем обработчик с кнопки "найти"
+        if (this.#searchBtn) {
+            this.#searchBtn.replaceWith(this.#searchBtn.cloneNode(true));
+        }
+
+        // Удаляем обработчик с инпута адреа
+        if (this.#addressInput) {
+            this.#addressInput.replaceWith(this.#addressInput.cloneNode(true));
+        }
         
         this.#marker = null;
         this.#addressInput = null;
         this.#searchBtn = null;
         this.#isInitialized = false;
+        this.#daDataInitialized = false;
     }
 
     // Геттер для получения состояния карты (инициализирована ли)
@@ -476,34 +509,45 @@ class DeliveryMap {
 // объявляем переменную для карты (т.к. она одна на страницу)
 let deliveryMap = null;
 
-// Карта самовывоза
-function initPickupMap(){
-    // защита от повторного вызова
-    const container = document.getElementById('pickup-map');
-    if (!container) return; 
-    
-    if (container.children.length > 0) {
-        return;
+// Класс через ES6 для карты самовывоза, конструктор с параметром (контейнер для создания в нем карты)
+class PickupMap{
+    #map = null; // объект Яндекс.Карты
+    #selectedStoreMarker = null; // текущий выбранный маркер магазина
+    #isInitialized = false; // флаг создания карты
+
+    // Метод убирания лоадера
+    #hideLoader() {
+        // Плавно убираем лоадер
+        const loader = document.getElementById('pickup-map-loader');
+        if (loader) {
+            loader.style.opacity = '0';
+            loader.style.visibility = 'hidden';
+            // Через время завершения анимации - полностью убираем
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 200); // Время должно совпадать с transition (0.4s)
+        }
     }
 
-    const map = new ymaps.Map('pickup-map', { 
-        center: [55.8, 37.64], 
-        zoom: 8 
-    });
-    
-    let selectedStoreMarker = null;
+    // Метода выбора магазина
+    async #selectPickupStore(storeId, address, marker, index) {
+        try {
+            // проверка на наличие fetchWithRetry
+            if (typeof fetchWithRetry !== 'function') {
+                console.error('[PickupMap] fetchWithRetry не определена');
+                return;
+            }
 
-    function selectPickupStore(storeId, address, marker, index) {
-        fetchWithRetry('src/saveDeliveryAddress.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({delivery_type: 'pickup', store_id: storeId  })
-        })
-        .then(data => {
+            const data = await fetchWithRetry('src/saveDeliveryAddress.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({delivery_type: 'pickup', store_id: storeId  })
+            })
+
             if (data.success) {
                 // Сбрасываем предыдущий выбранный маркер
-                if (selectedStoreMarker) {
-                    selectedStoreMarker.options.set({
+                if (this.#selectedStoreMarker) {
+                    this.#selectedStoreMarker.options.set({
                         iconImageHref: '/img/custom_map_pin.png'
                     });
                 }
@@ -512,9 +556,9 @@ function initPickupMap(){
                 marker.options.set({
                     iconImageHref: '/img/custom_map_pin_chosen.png'
                 });
-                selectedStoreMarker = marker;
+                this.#selectedStoreMarker = marker;
                 
-                // ОБНОВЛЯЕМ ТОЛЬКО ВЫБРАННУЮ КНОПКУ
+                // Обновляем только выбранную кнопку
                 const selectBtn = document.getElementById(`select-pickup-store-${index}`);
                 if (selectBtn) {
                     selectBtn.textContent = '✅ Магазин выбран';
@@ -528,21 +572,162 @@ function initPickupMap(){
                 
                 // Закрываем балун
                 marker.balloon.close();
+            } else {
+                // Устанавливаем дефолтный маркер
+                marker.options.set({
+                    iconImageHref: '/img/custom_map_pin.png'
+                });
+                
+                // Обновляем кнопку на дефолтную
+                const selectBtn = document.getElementById(`select-pickup-store-${index}`);
+                if (selectBtn) {
+                    selectBtn.textContent = 'Заберу отсюда';
+                    selectBtn.style.cursor = 'pointer';
+                    selectBtn.style.pointerEvents = 'auto';
+                    selectBtn.disabled = false;
+                }
+
+                throw new Error(data.message || 'Неизвестная ошибка сервера');
             }
-        });
+        } catch (error) {
+            console.error('[PickupMap] Ошибка выбора магазина:', error);
+            headerModal.open('Ошибка выбора магазина, попробуйте еще раз');
+        }
     }
 
-    function clearPickupMap() {
-        // стандартные балуны
-        if (selectedStoreMarker) {
-            selectedStoreMarker.options.set({
+    // Инициализация
+    async #initialize() {
+        try {
+            // Загружаем магазины из БД
+            const response = await fetch('src/getStores.php');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const stores = await response.json();
+
+            stores.forEach((store, index) => {
+                if (store.coordinates && store.coordinates.length === 2) {
+                    const placemark = new ymaps.Placemark(store.coordinates, {
+                        balloonContent: `
+                            <div style="min-width: 250px; font-family: 'Jost', Arial; font-size: 16px; color: black;">
+                                <div style="margin-bottom: 15px;">
+                                    <strong>${store.address}</strong><br>
+                                    <div style="margin-top: 10px;">${store.work_hours}</div>
+                                    <a href='tel: ${store.phone}' class="colour_href">
+                                        <div style="margin-top: 10px;">${store.phone}</div>
+                                    </a>
+                                </div>
+                                <div style="text-align: center;">
+                                    <button id="select-pickup-store-${index}" 
+                                            style="border: 0.15vw solid black; padding: 3% 5%; border-radius: 0.5vw; cursor: pointer; 
+                                            background: #4B4B4B !important;">
+                                        Заберу отсюда
+                                    </button>
+                                </div>
+                            </div>
+                        `
+                    }, {
+                        iconLayout: 'default#image',
+                        iconImageHref: '/img/custom_map_pin.png',
+                        iconImageSize: [60, 55],
+                        iconImageOffset: [-20, -40]
+                    });
+                    
+                    this.#map.geoObjects.add(placemark);
+                    
+                    // Обработчик открытия балуна
+                    placemark.events.add('balloonopen', () => {
+                        const currentAddress = document.getElementById('order-right-pickup-address').innerText;
+                        const isSelected = currentAddress === store.address;
+                        
+                        if (isSelected) {
+                            setTimeout(() => {
+                                const selectBtn = document.getElementById(`select-pickup-store-${index}`);
+                                if (selectBtn) {
+                                    selectBtn.textContent = '✅ Магазин выбран';
+                                    selectBtn.style.cursor = 'default';
+                                    selectBtn.style.pointerEvents = 'none';
+                                    selectBtn.disabled = true;
+                                }
+                            }, 0);
+                        } else {
+                            setTimeout(() => {
+                                const selectBtn = document.getElementById(`select-pickup-store-${index}`);
+                                if (selectBtn && !selectBtn.hasAttribute('data-listener-added')) {
+                                    selectBtn.setAttribute('data-listener-added', 'true');
+                                    selectBtn.addEventListener('click', () => {
+                                        this.#selectPickupStore(store.id, store.address, placemark, index);
+                                    });
+                                }
+                            }, 100);
+                        }
+                    });
+                }
+            });
+
+            // Настройка объекта
+            this.#hideLoader();
+            this.#isInitialized = true;
+        } catch (error) {
+            console.error('[PickupMap] Ошибка инициализации:', error);
+            showMapError('pickup');
+            this.#isInitialized = false;
+
+            // Удаляем карту при ошибке
+            if (this.#map) {
+                this.#map.destroy();
+            }
+        }
+    }
+
+    // Конструктор с параметром, в параметре id контейнера для карты (например 'delivery-map')
+    constructor(containerId) {
+        try {
+            // Проверка API Яндекса
+            if (!window.ymaps) {
+                throw new Error('Yandex Maps API не загружен');
+            }
+            if (!ymaps.Map || typeof ymaps.Map !== 'function') {
+                throw new Error('Yandex Maps API: Map не доступен');
+            }
+
+            // Защита от повторного вызова
+            const container = document.getElementById(containerId);
+            if (!container || container.children.length > 0) return; 
+        
+            this.#map = new ymaps.Map(containerId, { 
+                center: [55.8, 37.64], 
+                zoom: 8,
+                controls: ['zoomControl']
+            });
+
+            // Инициализируем
+            this.#initialize().catch(() => {
+                // Пустой обработчик - ошибки уже обработаны внутри
+            });
+
+        } catch (error) {
+            console.error('[PickupMap] Ошибка инициализации:', error);
+            showMapError('pickup');
+            this.#isInitialized = false;
+        }
+    }
+
+    // Очистка карты
+    clearPickupMap() {
+        // Стандартные балуны
+        if (this.#selectedStoreMarker) {
+            this.#selectedStoreMarker.options.set({
                 iconImageHref: '/img/custom_map_pin.png'
             });
-            selectedStoreMarker = null;
+            this.#selectedStoreMarker = null;
         }
 
         // сбрасываем карту к центру
-        map.setCenter([55.76, 37.64], 8);
+        if (this.#map) {
+            this.#map.setCenter([55.76, 37.64], 8);
+        }
 
         // Сбрасываем все кнопки выбора магазина
         document.querySelectorAll('[id^="select-pickup-store-"]').forEach(btn => {
@@ -550,92 +735,34 @@ function initPickupMap(){
             btn.style.cursor = 'pointer';
             btn.style.pointerEvents = 'auto';
             btn.disabled = false;
-            btn.removeAttribute('data-listener-added');
+            btn.replaceWith(btn.cloneNode(true));
         });
     }
-    
-    // Загружаем магазины из БД
-    fetch('src/getStores.php')
-    .then(response => response.json())
-    .then(stores => {
-        stores.forEach((store, index) => {
-            if (store.coordinates && store.coordinates.length === 2) {
-                const placemark = new ymaps.Placemark(store.coordinates, {
-                    balloonContent: `
-                        <div style="min-width: 250px; font-family: 'Jost', Arial; font-size: 16px; color: black;">
-                            <div style="margin-bottom: 15px;">
-                                <strong>${store.address}</strong><br>
-                                <div style="margin-top: 10px;">${store.work_hours}</div>
-                                <a href='tel: ${store.phone}' class="colour_href">
-                                    <div style="margin-top: 10px;">${store.phone}</div>
-                                </a>
-                            </div>
-                            <div style="text-align: center;">
-                                <button id="select-pickup-store-${index}" 
-                                        style="border: 0.15vw solid black; padding: 3% 5%; border-radius: 0.5vw; cursor: pointer; 
-                                        background: #4B4B4B !important;">
-                                    Заберу отсюда
-                                </button>
-                            </div>
-                        </div>
-                    `
-                }, {
-                    iconLayout: 'default#image',
-                    iconImageHref: '/img/custom_map_pin.png',
-                    iconImageSize: [60, 55],
-                    iconImageOffset: [-20, -40]
-                });
-                
-                map.geoObjects.add(placemark);
-                
-                // Обработчик открытия балуна
-                placemark.events.add('balloonopen', function() {
-                    const currentAddress = document.getElementById('order-right-pickup-address').innerText;
-                    const isSelected = currentAddress === store.address;
-                    
-                    if (isSelected) {
-                        setTimeout(() => {
-                            const selectBtn = document.getElementById(`select-pickup-store-${index}`);
-                            if (selectBtn) {
-                                selectBtn.textContent = '✅ Магазин выбран';
-                                selectBtn.style.cursor = 'default';
-                                selectBtn.style.pointerEvents = 'none';
-                                selectBtn.disabled = true;
-                            }
-                        }, 0);
-                    } else {
-                        setTimeout(() => {
-                            const selectBtn = document.getElementById(`select-pickup-store-${index}`);
-                            if (selectBtn && !selectBtn.hasAttribute('data-listener-added')) {
-                                selectBtn.setAttribute('data-listener-added', 'true');
-                                selectBtn.addEventListener('click', function() {
-                                    selectPickupStore(store.id, store.address, placemark, index);
-                                });
-                            }
-                        }, 100);
-                    }
-                });
-            }
-        });
-        
-    })
-    .catch(error => {
-        console.error('Ошибка загрузки магазинов:', error);
-    });
 
-    // Плавно убираем лоадер
-    const loader = document.getElementById('pickup-map-loader');
-    if (loader) {
-        loader.style.opacity = '0';
-        loader.style.visibility = 'hidden';
-        // Через время завершения анимации - полностью убираем
-        setTimeout(() => {
-            loader.style.display = 'none';
-        }, 200); // Время должно совпадать с transition (0.4s)
+    // Удаление карты
+    destroy() {
+        if (!this.#isInitialized) {
+            // тут номрмальное логирование потом
+            console.error('[PickupMap] Карта не инициализирована');
+            return;
+        }
+
+        if (this.#map) {
+            this.#map.destroy(); // метод яндекс карт
+            this.#map = null;
+        }
+        
+        this.#isInitialized = false;
+    }
+
+    // Геттер для получения состояния карты (инициализирована ли)
+    get isInitialized() {
+        return this.#isInitialized;
     }
 }
 
-
+// объявляем переменную для карты (т.к. она одна на страницу)
+let pickupMap = null;
 
 if (typeof ymaps === 'undefined') {
     showMapError();

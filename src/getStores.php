@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/helpers.php';
 // header('Content-Type: application/json');
+// тут зарефаткорить (crsf, статусы и другое)
 
 $connect = getDB();
 if (!$connect) {

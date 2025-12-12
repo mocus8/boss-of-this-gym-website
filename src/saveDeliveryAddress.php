@@ -1,5 +1,7 @@
 <?php
 // тут не хватает многих проверок для продакшена, потом зарефакторить с остальными api
+// тут зарефаткорить (crsf, статусы и другое)
+
 session_start();
 require_once __DIR__ . '/helpers.php';
 header('Content-Type: application/json');
