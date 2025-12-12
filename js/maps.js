@@ -27,6 +27,10 @@ function showMapError(type = 'all') {
 
 // Карта магазинов
 function initStoresMap(){
+    // защита от повторного вызова
+    const container = document.getElementById('stores-map');
+    if (!container || container.children.length > 0) return; 
+
     const map = new ymaps.Map('stores-map', { 
         center: [55.76, 37.64], 
         zoom: 10 

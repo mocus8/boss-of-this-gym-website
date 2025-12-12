@@ -111,6 +111,7 @@ class PayErrorModal {
         if(this.#pickupModalText) this.#pickupModalText.textContent = '';
     }
 }
+
 // создаем объект класса
 const payErrorModal = new PayErrorModal();
 
