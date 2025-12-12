@@ -1,4 +1,4 @@
-// СКРЫВАЕМ ОШИБКИ АДРЕСА ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
+// Скрываем ошибки адреса при открытии страницы
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.error_address_not_found').forEach(block => {
         block.classList.remove('open');
@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-//  Показ ошибки
+// Показ ошибки
 function showMapError(type = 'all') {
     console.error('Ошибка Яндекс.Карт:', type);
     
@@ -309,27 +309,31 @@ class DeliveryMap {
                     window.Dadata.createSuggestions(this.#addressInput, {
                         token: data.key,
                         type: "address",
-                        count: 5
-                    });
-                    
-                    const container = document.getElementById(this.#containerId);
-                    if (!container) return;
-
-                    // Обработчик выбора подсказки
-                    container.addEventListener('click', (e) => {
-                        let target = e.target;
-                        while (target && target !== document.body) {
-                            if (target.classList && target.classList.contains('suggestions-suggestion')) {
-                                setTimeout(() => {
-                                    this.#processAddress(this.#addressInput.value);
-                                }, 100);
-
-                                break;
-                            }
-
-                            target = target.parentElement;
+                        count: 5,
+                        // Встроенный обработчик выбора подсказки от DaData
+                        onSelect: (suggestion) => {
+                            this.#processAddress(suggestion.value);
                         }
                     });
+
+                    // // Кастомный обработчик выбора подсказки
+                    // const container = document.getElementById(this.#containerId);
+                    // if (!container) return;
+                    // container.addEventListener('click', (e) => {
+                    //     let target = e.target;
+                    //     while (target && target !== document.body) {
+                    //         if (target.classList && target.classList.contains('suggestions-suggestion')) {
+                    //             setTimeout(() => {
+                    //                 this.#processAddress(this.#addressInput.value);
+                    //                 console.log("Обработчик по подсказке сработал");
+                    //             }, 100);
+
+                    //             break;
+                    //         }
+
+                    //         target = target.parentElement;
+                    //     }
+                    // });
 
                     this.#daDataInitialized = true;
                 }
