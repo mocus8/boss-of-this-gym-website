@@ -52,6 +52,12 @@ input:autofill:active {
     overflow: hidden !important;
 }
 
+.processing {
+    pointer-events: none !important;
+    cursor: progress !important;
+    opacity: 0.9 !important;
+}
+
 ::-webkit-scrollbar {
     width: 0.75vw;  
 }

@@ -157,7 +157,7 @@ document.querySelector('.order_types').addEventListener('click', function(e) {
         return;
     }
 
-    // ОЧИСТКА ИНТЕРФЕЙСА ПЕРЕЕД ПЕРЕКЛЮЧЕНИЕМ
+    // Очищаем интерфейс перед переключением 
     clearOrderInterface(previousType);
 
     // Переключение модалок
@@ -179,13 +179,59 @@ document.querySelector('.order_types').addEventListener('click', function(e) {
     document.getElementById('order-type-delivery').classList.toggle('chosen', isDelivery);
     document.getElementById('order-type-pickup').classList.toggle('chosen', !isDelivery);
     
-    // ОБНОВЛЯЕМ ТИП ДОСТАВКИ В БД
+    // Обновляем тип доставки в бд
     updateDeliveryTypeInDB(isDelivery ? 'delivery' : 'pickup');
 });
+
+// Функция разбора ошибок на понятные сообщения
+function getErrorMessage(status, errorCode) {
+    let message = null;
+
+    // Маппинг HTTP статусов
+    const statusMessages = {
+        400: 'Неверный запрос',
+        401: 'Требуется авторизация',
+        403: 'Доступ запрещен',
+        404: 'Заказ не найден',
+        409: 'Конфликт при обработке заказа',
+        429: 'Слишком много запросов. Попробуйте через минуту',
+        500: 'Внутренняя ошибка сервера',
+        502: 'Платежная система временно недоступна',
+        503: 'Сервис временно недоступен'
+    };
+    
+    // Сначала пробуем получить по статусу
+    message = statusMessages[status];
+    
+    // Особыи случаи для 409
+    if (status === 409) {
+        if (errorCode === 'PAYMENT_IN_PROGRESS') {
+            message = 'Платеж уже обрабатывается. Подождите 5 секунд.';
+        }
+    }
+
+    // Особыи случаи для 422
+    if (status === 422 && errorCode) {
+        const validationMessages = {
+            'EMPTY_USER_PHONE': 'Укажите номер телефона в профиле',
+            'INVALID_PHONE_FORMAT': 'Неверный формат телефона',
+            'RECEIPT_TOTAL_MISMATCH': 'Ошибка расчета суммы. Обновите страницу',
+            'INVALID_PAYMENT_DATA': 'Неверные данные для оплаты'
+        };
+
+        message = validationMessages[errorCode];
+    }
+
+    if (message === null) return 'Произошла ошибка'
+    
+    return message;
+}
 
 //обработчик кнопки оплаты
 document.querySelectorAll('.order_right_pay_button').forEach(button => {
     button.addEventListener('click', async function() {
+        if (this.classList.contains('button-processing')) return;
+
         const orderId = this.getAttribute('data-order-id');
         const isDelivery = document.getElementById('order-type-delivery').classList.contains('chosen');
         const deliveryAddress = document.getElementById('order-right-delivery-address').textContent ;
@@ -196,6 +242,7 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
         payErrorModal.close();
 
         // блокируем кнопку на время выполнения скрипта
+        this.classList.add('button-processing');
         button.disabled = true;
         button.textContent = 'Создаем платеж...';
 
@@ -203,22 +250,29 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
         if (isDelivery && deliveryAddress.includes("не указан")) {
             payErrorModal.open('Укажите адрес доставки.');
 
+            this.classList.remove('button-processing');
             button.disabled = false;
             button.textContent = originalText;
 
             return;
         } else if (!isDelivery && pickupAddress.includes("не указан")) {
-            // проверка на отсутствие магазина доставки если самовывоз
+            // Проверка на отсутствие магазина доставки если самовывоз
             payErrorModal.open('Укажите магазин для самовывоза.');
 
+            this.classList.remove('button-processing');
             button.disabled = false;
             button.textContent = originalText;
 
             return;
         }
 
+        // Ставим таймаут на работу api 10 секунд, потом выбрасываем ошибку
+        // AbortController - встроенный js класс для прерывания операций
+        const abortController = new AbortController();
+        const timeoutId = setTimeout(() => abortController.abort(), 15000); // 15 сек
+
         try {
-            // ПЕРЕДАЕМ order_id В POST
+            // Передаем order_id В POST
             const response = await fetch('/create_payment.php', {
                 method: 'POST',
                 headers: {
@@ -226,8 +280,12 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
                 },
                 body: JSON.stringify({
                     order_id: orderId
-                })
+                }),
+                signal: abortController.signal
             });
+
+            // После обащения к api сразу очищаем таймер
+            clearTimeout(timeoutId);
 
             // Проверка что ответ JSON
             let result;
@@ -239,22 +297,54 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
             }
                             
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+                // Если этот заказ уже оплачен
+                if (response.status === 409 && result.error === 'ORDER_ALREADY_PAID') {
+                    window.location.href = `/order_success.php?orderId=${orderId}`;
+                    return;
+                }
+
+                // Получение и показ понятного сообщения об ошибке
+                const errorMessage = getErrorMessage(response.status, result?.error);
+                payErrorModal.open(errorMessage);
+                return;
             }
             
-            if (result.confirmation_url) {
-                window.location.href = result.confirmation_url;
+            if (!result.confirmation_url) {
+                // Потом нормально логировать
+                console.error('Ошибка, не получена ссылка для оплаты')
+                payErrorModal.open('Ошибка, не получена ссылка для оплаты, попробуйте еще раз.');
 
-            } else {
-                throw new Error(result.error || 'Payment error');
-            }
+                return;
+            } 
+
+            window.location.href = result.confirmation_url;
 
         } catch (error) {
-            console.error('Full error:', error);
-            alert('Ошибка: ' + error.message);
+            // Если ловим ошибку очищаем таймер
+            clearTimeout(timeoutId);
+
+            // Потом нормально логировать
+            console.error('Payment error:', {
+                timestamp: new Date().toISOString(),
+                orderId,
+                isDelivery,
+                status: response?.status,
+                errorCode: result?.error,
+                error: error.message
+            });
+
+            if (error.name === 'AbortError') {
+                payErrorModal.open('Превышено время ожидания. Попробуйте позже.');
+            } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                // Если ошибки связаны с сетью
+                payErrorModal.open('Нет соединения с сервером. Проверьте интернет соеденение.');
+            } else {
+                // Другие ошибки
+                payErrorModal.open('Ошибка при создании платежа. Попробуйте позже.');
+            }
 
         } finally {
+            this.classList.remove('button-processing');
             button.disabled = false;
             button.textContent = originalText;
         }
