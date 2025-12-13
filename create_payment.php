@@ -256,9 +256,7 @@ try {
 
     // возвращаем ссылку для оплаты с нужными данными (создала юкасса)
     http_response_code(201); // Created (лучше чем 200 для создания ресурса)
-    echo json_encode([
-        'confirmation_url' => $payment->getConfirmation()->getConfirmationUrl()
-    ]);
+    echo json_encode(['confirmation_url' => $payment->getConfirmation()->getConfirmationUrl()]);
 
 // ловим таймаут по блокировке в бд (если FOR UPDATE сработал)
 } catch (mysqli_sql_exception $e) {
@@ -327,7 +325,6 @@ try {
     }
 
 } finally {
-    if (isset($stmt) && $stmt) $stmt->close();
     // по thread_id проверяем что соединение активно
     if (isset($connect) && $connect->thread_id) {
         $connect->close();

@@ -230,7 +230,7 @@ function getErrorMessage(status, errorCode) {
 //обработчик кнопки оплаты
 document.querySelectorAll('.order_right_pay_button').forEach(button => {
     button.addEventListener('click', async function() {
-        if (this.classList.contains('button-processing')) return;
+        if (this.classList.contains('processing')) return;
 
         const orderId = this.getAttribute('data-order-id');
         const isDelivery = document.getElementById('order-type-delivery').classList.contains('chosen');
@@ -242,7 +242,7 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
         payErrorModal.close();
 
         // блокируем кнопку на время выполнения скрипта
-        this.classList.add('button-processing');
+        this.classList.add('processing');
         button.disabled = true;
         button.textContent = 'Создаем платеж...';
 
@@ -250,7 +250,7 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
         if (isDelivery && deliveryAddress.includes("не указан")) {
             payErrorModal.open('Укажите адрес доставки.');
 
-            this.classList.remove('button-processing');
+            this.classList.remove('processing');
             button.disabled = false;
             button.textContent = originalText;
 
@@ -259,7 +259,7 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
             // Проверка на отсутствие магазина доставки если самовывоз
             payErrorModal.open('Укажите магазин для самовывоза.');
 
-            this.classList.remove('button-processing');
+            this.classList.remove('processing');
             button.disabled = false;
             button.textContent = originalText;
 
@@ -344,7 +344,7 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
             }
 
         } finally {
-            this.classList.remove('button-processing');
+            this.classList.remove('processing');
             button.disabled = false;
             button.textContent = originalText;
         }
