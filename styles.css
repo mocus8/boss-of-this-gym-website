@@ -2535,8 +2535,8 @@ button {
 .order_error {
     position: absolute;
     width: min-content;
-    top: 3.5%;
-    right: 3%;
+    top: 5%;
+    right: 5%;
     height: 2.5vw;
     background-color: white;
     border-radius: 0.25vw;

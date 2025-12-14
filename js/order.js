@@ -292,7 +292,7 @@ document.querySelectorAll('.order_right_pay_button').forEach(button => {
             try {
                 result = await response.json();
             } catch (jsonError) {
-                payErrorModal.open('Некорректный ответ от сервера.');
+                payErrorModal.open('Некорректный ответ от сервера, попробуйте еще раз');
                 return;
             }
                             

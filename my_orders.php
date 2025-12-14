@@ -1,8 +1,7 @@
 <?php
 session_start();
-require_once __DIR__ . '/src/envLoader.php';
 
-// ПРОВЕРКА АВТОРИЗАЦИИ - ЕСЛИ НЕ АВТОРИЗОВАН, ПЕРЕНАПРАВЛЯЕМ НА ГЛАВНУЮ
+// Если пользователь не авторизирован то перекидываем на главную
 if (!isset($_SESSION['user']['id'])) {
     header('Location: index.php');
     exit;
@@ -26,8 +25,6 @@ if (!isset($_SESSION['user']['id'])) {
             <?php 
             require_once __DIR__ . '/header.php'; 
 
-            // тут в нормальной версии нужно обрабатывать ошибку при подключении и далее,
-            // и логировать ее как положено вместе с остальными
             try {
                 $connect = getDB();
                 if (!$connect || $connect->connect_error) {
@@ -65,6 +62,7 @@ if (!isset($_SESSION['user']['id'])) {
                     $ordersInfo[] = $order;
                 }
             } catch (Exception $e) {
+                // потом нормально логировать
                 error_log("My orders error: " . $e->getMessage());
                 $ordersInfo = [];
             } finally {
@@ -97,7 +95,7 @@ if (!isset($_SESSION['user']['id'])) {
                     } else {
                         foreach ($ordersInfo as $order) {
                     ?>
-                            <div class="order">
+                            <div class="order" data-order-id="<?= $order['order_id'] ?>">
                                 <div class="order_number">
                                     Заказ <?= '#' . str_pad($order['order_id'], 6, '0', STR_PAD_LEFT) ?>
                                 </div>
@@ -123,7 +121,7 @@ if (!isset($_SESSION['user']['id'])) {
                                 <?php
                                 } 
                                 ?>
-                                <div class="order_data">
+                                <div class="order_data" data-field="status">
                                     Статус заказа: <br>
                                     <?= match($order['status']) {
                                         'cart' => 'корзина',
@@ -145,15 +143,19 @@ if (!isset($_SESSION['user']['id'])) {
                                 <?php
                                 } else if ($order['status'] === 'pending_payment') {
                                 ?>
-                                    <div class="order_button" data-action="pay" data-order-id="<?= $order['order_id'] ?>">
+                                    <div class="order_button" data-action="pay">
                                         Оплатить
                                     </div>
-                                    <div class="order_button" data-action="cancel" data-order-id="<?= $order['order_id'] ?>">
+                                    <div class="order_button" data-action="cancel">
                                         Отменить
                                     </div>
                                 <?php
                                 }
                                 ?>
+                                <div class="order_error hidden" id="error-modal-<?= $order['order_id'] ?>">
+                                    <img class="error_modal_icon" src="img/error_modal_icon.png">
+                                    <div id="error-modal-text-<?= $order['order_id'] ?>"></div>
+                                </div>
                                 <?php 
                                 // Проверяем наличие КОНКРЕТНОГО кода ошибки оплаты
                                 if (isset($_SESSION['flash_payment_error']) && isset($_SESSION['flash_payment_error'][$order['order_id']])) { 
@@ -233,15 +235,13 @@ if (!isset($_SESSION['user']['id'])) {
         </div>
         <div class="registration_modal_blur" id="order-cancel-modal">
             <div class="account_delete_modal">
-                <div class="account_delete_modal_entry_text">
-                    Вы уверены что хотите отменить заказ?
-                </div>
+                <div class="account_delete_modal_entry_text" id='order-delete-modal-entry-text'></div>
                 <div class="registration_modal_form">
                     <div class="registration_modal_buttons">
                         <button class="registration_modal_button" type="button" id="close-order-cancel-modal">
                             Вернуться
                         </button>
-                        <form method="POST" action="/src/cancelOrder.php" id="cancel-order-form" class="registration_modal_button">
+                        <form action="/src/cancelOrder.php" method="POST" class="registration_modal_button" id="cancel-order-form">
                             <input type="hidden" name="order_id" id="cancel-order-id">
                             <button type="submit">
                                 Отменить заказ
@@ -251,6 +251,6 @@ if (!isset($_SESSION['user']['id'])) {
                 </div>
             </div>
         </div>
-        <script defer src="js/my_orders.js"></script>
+        <script type="module" src="js/my_orders.js"></script>
 	</body>
 </html>

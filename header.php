@@ -191,7 +191,7 @@ if ($idUser != '') {
             <div class="registration_modal_entry_text">
                 Регистрация
             </div>
-            <form class="registration_modal_form" action="src/registration.php" method="post" data-recaptcha-site-key="<?= getenv('GOOGLE_RECAPTCHA_SITE_KEY') ?>">
+            <form action="src/registration.php" method="POST" class="registration_modal_form" data-recaptcha-site-key="<?= getenv('GOOGLE_RECAPTCHA_SITE_KEY') ?>">
                 <div class="registration_modal_input_back">
                     <span class="registration_modal_input_text">
                         Ваше имя и фамилия:
@@ -273,7 +273,7 @@ if ($idUser != '') {
             <div class="authorization_modal_entry_text">
                 Вход в аккаунт
             </div>
-            <form class="authorization_modal_form" action="src/authorization.php" method="post">
+            <form action="src/authorization.php" method="POST" class="authorization_modal_form">
                 <div class="authorization_modal_input_back">
                     <span class="authorization_modal_input_text">
                         Ваш телефон:
@@ -314,7 +314,7 @@ if ($idUser != '') {
             <div class="account_edit_modal_entry_text">
                 Редактирование аккаунта
             </div>
-            <form class="registration_modal_form" action="src/editAccount.php" method="post">
+            <form action="src/editAccount.php" method="POST" class="registration_modal_form">
                 <div class="registration_modal_input_back">
                     <span class="registration_modal_input_text">
                         Ваше имя:

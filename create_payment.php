@@ -303,7 +303,7 @@ try {
         $error = 'PAYMENT_PROCESSING_ERROR';
     }
 
-    // Логируем с маскировкой телефона (если почта то маскируем ее и т д)
+    // Логируем с маскировкой телефона (если почта то маскируем ее и т д), потом логировать правильно
     $logMessage = preg_replace('/\+7\d{10}/', '[PHONE_MASKED]', $e->getMessage());
     error_log("Payment error [Order: $orderId]: " . $logMessage);
 
@@ -318,7 +318,6 @@ try {
     if (isset($connect)) {
         try {
             $connect->rollback();
-            $connect->close();
         } catch (Exception $rollbackError) {
             // Игнорируем ошибки при откате
         }
@@ -326,8 +325,6 @@ try {
 
 } finally {
     // по thread_id проверяем что соединение активно
-    if (isset($connect) && $connect->thread_id) {
-        $connect->close();
-    }
+    if (isset($connect)) $connect->close();
 }
 ?>
