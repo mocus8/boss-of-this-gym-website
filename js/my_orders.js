@@ -74,7 +74,10 @@ document.getElementById('cancel-order-form').addEventListener('submit', async fu
     e.preventDefault();
 
     const submitButton = this.querySelector('button[type="submit"]');
-    if (submitButton.classList.contains('processing')) return;
+    if (submitButton.classList.contains('processing')) {
+        closeModal('order-cancel-modal');
+        return;
+    }
 
     const originalText = submitButton.textContent;
 
@@ -110,6 +113,8 @@ document.getElementById('cancel-order-form').addEventListener('submit', async fu
 
     const orderElement = document.querySelector(`.order[data-order-id="${orderId}"]`);
     if (!orderElement) {
+        closeModal('order-cancel-modal');
+
         // Потом нормально логировать
         console.error('Cant find orderElement in cancel form:', orderId);
 
@@ -141,6 +146,8 @@ document.getElementById('cancel-order-form').addEventListener('submit', async fu
         try {
             result = await response.json();
         } catch (jsonError) {
+            closeModal('order-cancel-modal');
+
             errorModal.open('Некорректный ответ от сервера, попробуйте еще раз');
             return;
         }
@@ -148,9 +155,13 @@ document.getElementById('cancel-order-form').addEventListener('submit', async fu
         if (!response.ok) {
             // Если этот заказ уже отменен
             if (response.status === 409 && result.error === 'ORDER_ALREADY_CANCELLED') {
+                closeModal('order-cancel-modal');
+
                 errorModal.open('Заказ уже отменен, обновите страницу');
                 return;
             }
+
+            closeModal('order-cancel-modal');
 
             // Получение и показ понятного сообщения об ошибке
             const errorMessage = getErrorMessage(response.status, result?.error);
@@ -158,20 +169,26 @@ document.getElementById('cancel-order-form').addEventListener('submit', async fu
             return;
         }
 
-        // Обновляем статус
-        const statusElement = orderElement.querySelector('[data-field="status"]');
-        if (statusElement) {
-            statusElement.innerHTML = 'Статус заказа: <br>отменён';
-        }
-        
-        // Скрываем кнопки действий
-        orderElement.querySelectorAll('[data-action]').forEach(btn => {
-            btn.remove();
-        });
+        if (result.success) {
+            closeModal('order-cancel-modal');
 
-        headerModal.open('Заказ был успешно отменен.');
+            // Обновляем статус
+            const statusElement = orderElement.querySelector('[data-field="status"]');
+            if (statusElement) {
+                statusElement.innerHTML = 'Статус заказа: <br>отменён';
+            }
+            
+            // Скрываем кнопки действий
+            orderElement.querySelectorAll('[data-action]').forEach(btn => {
+                btn.remove();
+            });
+
+            headerModal.open('Заказ был успешно отменен.');
+        }
 
      } catch (error) {
+        closeModal('order-cancel-modal');
+
         // Потом нормально логировать
         console.error('Cant cancel order:', orderId);
 
