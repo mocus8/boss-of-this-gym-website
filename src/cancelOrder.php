@@ -5,6 +5,13 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/helpers.php';
 
+// Разрешаем только POST запросы
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405); // Method Not Allowed
+    echo json_encode(['error' => 'METHOD_NOT_ALLOWED']);
+    exit();
+}
+
 $orderId = $_POST["order_id"] ?? '';
 $userId = $_SESSION['user']['id'] ?? null;
 
@@ -52,6 +59,7 @@ try {
     }
 
     http_response_code(200);
+    echo json_encode(['success' => true]);
 
 } catch (Exception $e) {
     // сливаем в логи только безопасные ошибки (те что сами создали, отсальные могут содержать секреты)
