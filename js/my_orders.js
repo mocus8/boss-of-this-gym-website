@@ -1,5 +1,5 @@
-// Импортируем модуль ES6 класса
-import { ErrorModal } from './utils.js';
+// Импортируем модуль ES6 класса и функции для получения ошибок
+import { ErrorModal, getErrorMessage } from './utils.js';
 
 // Храним все модалки заказов через встроенный js класс Map(), наборы ключ -> значение
 const errorModals = new Map();
@@ -69,25 +69,29 @@ document.getElementById('close-order-cancel-modal').addEventListener('click', fu
     closeModal('order-cancel-modal');
 });
 
+// Обработчик модалки по escape (с формой внутри) отмены заказа
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal('order-cancel-modal');
+    }
+});
+
 // Обработчик подтверждения формы отмены заказа
 document.getElementById('cancel-order-form').addEventListener('submit', async function(e) {
     e.preventDefault();
 
     const submitButton = this.querySelector('button[type="submit"]');
-    if (submitButton.classList.contains('processing')) {
-        closeModal('order-cancel-modal');
-        return;
-    }
+    if (submitButton.classList.contains('processing')) return;
 
     const originalText = submitButton.textContent;
-
-    // Закртие всех модалок
-    ErrorModal.closeAll();
 
     // блокируем кнопку на время выполнения скрипта
     submitButton.classList.add('processing');
     submitButton.disabled = true;
     submitButton.textContent = 'Отменяем...';
+
+    // Закрытие всех предыдущих модалок ошибок
+    ErrorModal.closeAll();
 
     // Получаем и проверяем id заказа
     const orderId = document.getElementById('cancel-order-id').value;
@@ -207,24 +211,51 @@ document.getElementById('cancel-order-form').addEventListener('submit', async fu
      }
 });
 
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeModal('order-cancel-modal');
-    }
-});
-
+// Обработчик кнопки оплаты
 document.querySelectorAll('[data-action="pay"]').forEach(button => {
     button.addEventListener('click', async function() {
-
-        const orderId = this.getAttribute('data-order-id');
-
-        // Блокируем кнопку на время запроса
-        this.disabled = true;
+        if (this.classList.contains('processing')) return;
+        
         const originalText = this.textContent;
+
+        // блокируем кнопку на время выполнения скрипта
+        this.classList.add('processing');
+        this.disabled = true;
         this.textContent = 'Обработка...';
 
+        // Закрытие всех предыдущих модалок ошибок
+        ErrorModal.closeAll();
+
+        // Получаем и проверяем id заказа
+        const orderElement = this.closest('.order');
+        const orderId = orderElement.getAttribute('data-order-id');
+        if (!orderId || !orderId.match(/^\d+$/)) {
+            // Потом нормально логировать
+            console.error('Invalid orderId in cancel form:', orderId);
+    
+            headerModal.open('Не удалось определить номер заказа. Пожалуйста, обновите страницу и попробуйте снова.');
+    
+            // Разблокируем кнопку
+            this.classList.remove('processing');
+            this.disabled = false;
+            this.textContent = originalText;
+    
+            return;
+        }
+
+        const errorModal = errorModals.get(orderId);
+        if (!errorModal) {
+            headerModal.open('Ошибка данных заказа, обновите страницу и попробуйте еще раз')
+            return;
+        }
+
+        // Ставим таймаут на работу api 10 секунд, потом выбрасываем ошибку
+        // AbortController - встроенный js класс для прерывания операций
+        const abortController = new AbortController();
+        const timeoutId = setTimeout(() => abortController.abort(), 15000); // 15 сек
+
         try {
-            // ПЕРЕДАЕМ order_id В POST
+            // Передаем order_id В POST
             const response = await fetch('/create_payment.php', {
                 method: 'POST',
                 headers: {
@@ -232,27 +263,72 @@ document.querySelectorAll('[data-action="pay"]').forEach(button => {
                 },
                 body: JSON.stringify({
                     order_id: orderId
-                })
+                }),
+                signal: abortController.signal
             });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+
+            // После обащения к api сразу очищаем таймер
+            clearTimeout(timeoutId);
+
+            // Проверка что ответ JSON
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                errorModal.open('Некорректный ответ от сервера, попробуйте еще раз');
+                return;
             }
 
-            const rawText = await response.text();
-            const result = JSON.parse(rawText);
-            
-            if (result.confirmation_url) {
-                window.location.href = result.confirmation_url;
-            } else {
-                throw new Error(result.error || 'Payment error');
+            if (!response.ok) {
+                // Если этот заказ уже оплачен
+                if (response.status === 409 && result.error === 'ORDER_ALREADY_PAID') {
+                    window.location.href = `/order_success.php?orderId=${orderId}`;
+                    return;
+                }
+
+                // Получение и показ понятного сообщения об ошибке
+                const errorMessage = getErrorMessage(response.status, result?.error);
+                errorModal.open(errorMessage);
+                return;
             }
+
+            if (!result.confirmation_url) {
+                // Потом нормально логировать
+                console.error('Ошибка, не получена ссылка для оплаты')
+                errorModal.open('Ошибка, не получена ссылка для оплаты, попробуйте еще раз.');
+
+                return;
+            } 
+
+            window.location.href = result.confirmation_url;
+
         } catch (error) {
+            // Если ловим ошибку очищаем таймер
+            clearTimeout(timeoutId);
+
+            // Потом нормально логировать
+            console.error('Payment error:', {
+                timestamp: new Date().toISOString(),
+                orderId,
+                status: response?.status,
+                errorCode: result?.error,
+                error: error.message
+            });
+
+            if (error.name === 'AbortError') {
+                errorModal.open('Превышено время ожидания. Попробуйте позже.');
+            } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                // Если ошибки связаны с сетью
+                errorModal.open('Нет соединения с сервером. Проверьте интернет соеденение.');
+            } else {
+                // Другие ошибки
+                errorModal.open('Ошибка при создании платежа. Попробуйте позже.');
+            }
+
+        } finally {
+            this.classList.remove('processing');
             this.disabled = false;
             this.textContent = originalText;
-            
-            const errorText = getErrorMessage(error.message);
-            alert(errorText);
         }
     });
 });

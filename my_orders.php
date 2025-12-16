@@ -155,77 +155,14 @@ if (!isset($_SESSION['user']['id'])) {
                                 <div class="order_error hidden" id="error-modal-<?= $order['order_id'] ?>">
                                     <img class="error_modal_icon" src="img/error_modal_icon.png">
                                     <div id="error-modal-text-<?= $order['order_id'] ?>"></div>
-                                </div>
-                                <?php 
-                                // Проверяем наличие КОНКРЕТНОГО кода ошибки оплаты
-                                if (isset($_SESSION['flash_payment_error']) && isset($_SESSION['flash_payment_error'][$order['order_id']])) { 
-                                    // Преобразуем код в текст прямо на месте
-                                    $paymentErrorText = match($_SESSION['flash_payment_error'][$order['order_id']]) {
-                                        'PAYMENT_CANCELED' => 'Оплата отменена. Попробуйте еще раз',
-                                        'PAYMENT_FAILED' => 'Оплата не прошла. Попробуйте еще раз или выберите другой способ',
-                                        'ORDER_NOT_FOUND' => 'Заказ не найден. Попробуйте создать заказ заново',
-                                        'PAYMENT_PENDING' => 'Оплата обрабатывается. Подождите несколько минут',
-                                        'EMPTY_USER_PHONE' => 'Заказ не найден. Попробуйте создать заказ заново',
-                                        'PAYMENT_STATUS_UNKNOWN' => 'Статус оплаты неизвестен. Подождите или проверьте позже',
-                                        'DATABASE_CONNECT_FAILED' => 'Временные технические неполадки. Попробуйте позже',
-                                        'DATABASE_OPERATIONS_FAILED' => 'Ошибка обработки заказа. Попробуйте позже',
-                                        default => 'Произошла ошибка при оплате. Пожалуйста, попробуйте оплатить еще раз.'
-                                    };
-                                ?>
-                                    <div class="order_error open" id="flash-payment-error">
-                                        <img class="error_modal_icon" src="img/error_modal_icon.png">
-                                        <?= htmlspecialchars($paymentErrorText) ?>
-                                    </div>
-                                <?php 
-                                    // Удаляем ошибку после показа
-                                    unset($_SESSION['flash_payment_error'][$order['order_id']]);
-                                }
-                                
-                                if (isset($_SESSION['flash_cancel_error']) && isset($_SESSION['flash_cancel_error'][$order['order_id']])) {
-                                    // Преобразуем код в текст прямо на месте
-                                    $cancelErrorText = match($_SESSION['flash_payment_error'][$order['order_id']]) {
-                                        'DATABASE_OPERATIONS_FAILED' => 'Ошибка отмены заказа. Попробуйте позже',
-                                        'DATABASE_CONNECT_FAILED' => 'Временные технические неполадки. Попробуйте позже',
-                                        'ORDER_CANNOT_BE_CANCELLED' => 'Заказ не найден. Попробуйте позже или обновите страницу',
-                                        default => 'Произошла ошибка при отмене заказа. Пожалуйста, попробуйте отменить еще раз.'
-                                    };
-                                ?>
-                                    <div class="order_error open" id="flash-payment-error">
-                                        <img class="error_modal_icon" src="img/error_modal_icon.png">
-                                        <?= htmlspecialchars($cancelErrorText) ?>
-                                    </div>
-                                <?php 
-                                    // Удаляем ошибку после показа
-                                    unset($_SESSION['flash_cancel_error'][$order['order_id']]);
-                                }
-
-                                if (isset($_SESSION['flash_cancel_success']) && isset($_SESSION['flash_cancel_success'][$order['order_id']])) {
-                                ?>
-                                    <div class="order_error open" id="flash-payment-error">
-                                        <img class="error_modal_icon" src="img/error_modal_icon.png">
-                                        Заказ успешно отменен
-                                    </div>
-                                <?php 
-                                    // Удаляем ошибку после показа
-                                    unset($_SESSION['flash_cancel_success'][$order['order_id']]);
-                                }
-                                ?>
+                                </div> 
                             </div>
-                    <?php
+                        <?php
                         }
-                        if (isset($_SESSION['flash_payment_error']) && empty($_SESSION['flash_payment_error'])) {
-                            unset($_SESSION['flash_payment_error']);
-                        }
-                        if (isset($_SESSION['flash_cancel_error']) && empty($_SESSION['flash_cancel_error'])) {
-                            unset($_SESSION['flash_cancel_error']);
-                        }
-                        if (isset($_SESSION['flash_cancel_success']) && empty($_SESSION['flash_cancel_success'])) {
-                            unset($_SESSION['flash_cancel_success']);
-                        }
-                    ?>
-                    <div class="order_refund_info">
-                        Для возврата заказа свяжитесь с менеджером (<a href='tel: +70000000000' class="colour_href">+7 000 000 00 00</a>). Вернуть получится только заказы с момента получения которых прошло менее 14 дней
-                    </div>
+                        ?>
+                        <div class="order_refund_info">
+                            Для возврата заказа свяжитесь с менеджером (<a href='tel: +70000000000' class="colour_href">+7 000 000 00 00</a>). Вернуть получится только заказы с момента получения которых прошло менее 14 дней
+                        </div>
                     <?php
                     }
                     ?>
