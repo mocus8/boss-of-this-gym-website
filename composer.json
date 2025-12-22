@@ -1,5 +1,0 @@
-{
-    "require": {
-        "yoomoney/yookassa-sdk-php": "^3.11"
-    }
-}
