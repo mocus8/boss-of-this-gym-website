@@ -4,7 +4,7 @@ require_once __DIR__ . '/src/helpers.php';
 require_once __DIR__ . '/src/envLoader.php';
 
 // Настройки кэширования
-$cacheFile = __DIR__ . '/cache/categories_products.cache';
+$cacheFile = __DIR__ . '/public/cache/categories_products.cache';
 $cacheTime = 300; // 5 минут
 
 // Проверяем кэш
@@ -75,6 +75,10 @@ if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
         mkdir(dirname($cacheFile), 0755, true);
     }
     file_put_contents($cacheFile, serialize($categoriesWithProducts));
+}
+
+if (function_exists('getCartSessionId')) {
+    getCartSessionId();
 }
 ?>
 
