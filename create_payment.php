@@ -3,10 +3,6 @@
 session_start();
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/src/helpers.php';
-require_once __DIR__ . '/src/envLoader.php';
-require_once __DIR__ . '/vendor/autoload.php';
-
 $input = json_decode(file_get_contents('php://input'), true);
 $orderId = $input['order_id'] ?? '';
 $userId = $_SESSION['user']['id'] ?? null;
@@ -210,7 +206,7 @@ try {
             ],
             'confirmation' => [
                 'type' => 'redirect',
-                'return_url' => 'https://cw187549.tw1.ru/order.php?orderId=' . $orderId
+                'return_url' => $baseUrl . '/' . $orderId
             ],
             'capture' => true,
             'description' => 'Заказ №' . $orderId,

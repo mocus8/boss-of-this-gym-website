@@ -1,20 +1,17 @@
 <?php
 // Тут зарефакторить и новые коды ошибок добавить в utils
-session_start();
-
-require_once __DIR__ . '/src/helpers.php';
 
 $userId = $_SESSION['user']['id'] ?? null;
 $orderId = $_GET['orderId'] ?? '';
 $paidAt = null;
 
 if (!$userId) {
-    header('Location: index.php');
+    header('Location: /');
     exit();
 }
 
 if (!$orderId) {
-    header('Location: 404.php');
+    require __DIR__ . '/404.php';
     exit();
 }
 
@@ -72,9 +69,6 @@ try {
         }
 
         try {
-            require_once __DIR__ . '/vendor/autoload.php';
-            require_once __DIR__ . '/src/envLoader.php';
-            
             $yookassa = new \YooKassa\Client();
             $yookassa->setAuth(getenv('YOOKASSA_SHOP_ID'), getenv('YOOKASSA_API_KEY'));
             
@@ -184,11 +178,13 @@ require_once __DIR__ . '/src/getOrderData.php';
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta charset="utf-8">
+        <meta charset="utf-8">
+        <meta name="robots" content="noindex, nofollow">
 		<title>
             Интернет-магазин "Boss Of This Gym"
 		</title>
-		<link rel="stylesheet" href="styles.css">
+        <link rel="icon" href="/public/favicon.ico" type="image/x-icon">
+		<link rel="stylesheet" href="/styles.css">
 	</head>
 	<body class="body">
         <div class="loader-overlay" id="loader">
@@ -202,6 +198,6 @@ require_once __DIR__ . '/src/getOrderData.php';
             ?>
         </div>
 
-        <script type="module" src="js/order.js"></script>
+        <script type="module" src="/js/order.js"></script>
 	</body>
 </html>

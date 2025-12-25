@@ -1,10 +1,4 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-//подключаем файл хелперс с нужной функцией
-require_once __DIR__ . '/src/helpers.php';
-
 $connect = getDB();
 
 $cartSessionId = getCartSessionId();
@@ -56,20 +50,20 @@ if ($idUser != '') {
 ?>
 
 <header class="header">
-    <a href="index.php" class="icon_href">
+    <a href="/" class="icon_href">
         <div class="internet_shop">
             Интернет-магазин спортивной атрибутики
         </div>
         <div class="boss_of_this_gym">
             “Boss Of This Gym”
         </div>
-        <img class="icon_billy" src="img/icon_billy.svg" alt="Мужик, качёк, крутой парень, Билли Харрингтон">
+        <img class="billy" src="/img/billy.svg" alt="Мужик, качёк, крутой парень, Билли Харрингтон">
 <!--                                                                        Добавлять этот атрибут для CEO-->
     </a>
     <div class="header_buttons">
-        <a href="cart.php">
+        <a href="/cart">
             <div class="header_button">
-                <img class="header_button_icon" src="img/cart.png">
+                <img class="header_button_icon" src="/img/cart.png">
                 <div class="header_button_text">
                     Корзина (<span id="header-cart-counter"><?= $headerCartCount ?></span>)
                 </div>
@@ -80,7 +74,7 @@ if ($idUser != '') {
         ?>
         <a class="order-button-link" id="open-my-orders-for-guest" style="cursor: pointer;">
             <div class="header_button">
-                <img class="header_button_icon" src="img/box.png">
+                <img class="header_button_icon" src="/img/box.png">
                 <div class="header_button_text">
                     Мои заказы
                 </div>
@@ -89,9 +83,9 @@ if ($idUser != '') {
         <?php
         } else {
         ?>
-        <a href="my_orders.php">
+        <a href="/my-orders">
             <div class="header_button">
-                <img class="header_button_icon" src="img/box.png">
+                <img class="header_button_icon" src="/img/box.png">
                 <div class="header_button_text">
                     Мои заказы
                 </div>
@@ -100,25 +94,25 @@ if ($idUser != '') {
         <?php
         }
         ?>
-        <a href="contacts.php">
+        <a href="/contacts">
             <div class="header_button">
-                <img class="header_button_icon" src="img/phone.png">
+                <img class="header_button_icon" src="/img/phone.png">
                 <div class="header_button_text">
                     Контакты
                 </div>
             </div>
         </a>
-        <a href="stores.php">
+        <a href="/stores">
             <div class="header_button">
-                <img class="header_button_icon" src="img/map.png">
+                <img class="header_button_icon" src="/img/map.png">
                 <div class="header_button_text">
                     Наши магазины
                 </div>
             </div>
         </a>
-        <a href="kwork_customers.php">
+        <a href="/kwork-customers">
             <div class="header_button">
-                <img class="header_button_icon" src="img/kwork.png">
+                <img class="header_button_icon" src="/img/kwork.png">
                 <div class="header_button_text">
                     Для заказчиков
                 </div>
@@ -127,7 +121,7 @@ if ($idUser != '') {
     </div>
     <div class="header_search">
         <div class="header_search_click">
-            <img class="header_search_icon" src="img/glass.png">
+            <img class="header_search_icon" src="/img/glass.png">
             <label for="header-search-input" class="header_search_text">
                 Поиск товаров:
             </label>
@@ -140,7 +134,7 @@ if ($idUser != '') {
     if ($idUser == '') {
     ?>
         <div class="header_account">
-            <img class="header_account_icon" src="img/person.png">
+            <img class="header_account_icon" src="/img/person.png">
             <button class="header_account_button_guest"  id="open-authorization-modal">
                 Войти в аккаунт
             </button>
@@ -152,7 +146,7 @@ if ($idUser != '') {
     } else {
     ?>
         <div class="header_account">
-            <img class="header_account_icon" src="img/person.png">
+            <img class="header_account_icon" src="/img/person.png">
             <div class="header_account_data">
                 <div class="header_account_inf">
                     <?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>
@@ -163,13 +157,13 @@ if ($idUser != '') {
             </div>
             <div class="header_account_buttons_logged_in">
                 <button class="header_account_button_logged_in" id="open-account-editior-modal">
-                    <img class="header_account_button_logged_in_icon"src="img/edit.png">
+                    <img class="header_account_button_logged_in_icon"src="/img/edit.png">
                 </button>
                 <button class="header_account_button_logged_in" id="open-account-exit-modal">
-                    <img class="header_account_button_logged_in" src="img/exit.png">
+                    <img class="header_account_button_logged_in" src="/img/exit.png">
                 </button>
                 <button class="header_account_button_logged_in" id="open-account-edit-modal">
-                    <img class="header_account_button_logged_in_icon"src="img/trash.png">
+                    <img class="header_account_button_logged_in_icon"src="/img/trash.png">
                 </button>
             </div>
         </div>
@@ -179,7 +173,7 @@ if ($idUser != '') {
     <div class="header_modal hidden" id="header-modal">
         <button class="header_modal_close_btn" id="header-modal-close">✕</button>
         <div class="header_modal_top">
-            <img class="header_modal_icon"src="img/inf.png">
+            <img class="header_modal_icon"src="/img/inf.png">
             <div class="header_modal_text" id="header-modal-text"></div>
         </div>
         <div class="header_modal_progress">
@@ -242,25 +236,25 @@ if ($idUser != '') {
                     </button>
                 </div>
                 <div class="user_already_exists_back" id="user-already-exists-modal">
-                    <img class="error_modal_icon" src="img/error_modal_icon.png">
+                    <img class="error_modal_icon" src="/img/error_modal_icon.png">
                     <div class="error_modal_text">
                         Пользователь уже зарегистрирован.
                     </div>
                 </div>
                 <div class="incorrect_sms_code_back" id="incorrect-sms-code-modal">
-                    <img class="error_modal_icon" src="img/error_modal_icon.png">
+                    <img class="error_modal_icon" src="/img/error_modal_icon.png">
                     <div class="error_modal_text">
                         Неверный код подтверждения.
                     </div>
                 </div>
                 <div class="incorrect_phone_number_back" id="incorrect-phone-number-modal">
-                    <img class="error_modal_icon" src="img/error_modal_icon.png">
+                    <img class="error_modal_icon" src="/img/error_modal_icon.png">
                     <div class="error_modal_text">
                         Неверный формат номера.
                     </div>
                 </div>
                 <div class="password_mismatch_back" id="password-mismatch-modal">
-                    <img class="error_modal_icon" src="img/error_modal_icon.png">
+                    <img class="error_modal_icon" src="/img/error_modal_icon.png">
                     <div class="error_modal_text">
                         Пароли не совпадают.
                     </div>
@@ -273,7 +267,7 @@ if ($idUser != '') {
             <div class="authorization_modal_entry_text">
                 Вход в аккаунт
             </div>
-            <form action="src/authorization.php" method="POST" class="authorization_modal_form">
+            <form action="/src/authorization.php" method="POST" class="authorization_modal_form">
                 <div class="authorization_modal_input_back">
                     <span class="authorization_modal_input_text">
                         Ваш телефон:
@@ -295,13 +289,13 @@ if ($idUser != '') {
                     </button>
                 </div>
                 <div class="uknown_user_back" id="uknown-user-modal">
-                    <img class="error_modal_icon" src="img/error_modal_icon.png">
+                    <img class="error_modal_icon" src="/img/error_modal_icon.png">
                     <div class="error_modal_text">
                         Пользователь с таким телефоном не зарегистрирован.
                     </div>
                 </div>
                 <div class="wrong_password_back" id="wrong-password-modal">
-                    <img class="error_modal_icon" src="img/error_modal_icon.png">
+                    <img class="error_modal_icon" src="/img/error_modal_icon.png">
                     <div class="error_modal_text">
                         Неверный пароль.
                     </div>
@@ -340,7 +334,7 @@ if ($idUser != '') {
                     </div>
                 </div>
                 <div class="old_password_missmatch_back" id="old-password-missmatch-modal">
-                    <img class="error_modal_icon" src="img/error_modal_icon.png">
+                    <img class="error_modal_icon" src="/img/error_modal_icon.png">
                     <div class="error_modal_text">
                         Старый пароль не совпадает.
                     </div>
@@ -390,8 +384,8 @@ if ($idUser != '') {
             </div>
         </div>
     </div>
-    <script src="js/loader.js"></script>
+    <script src="/js/loader.js"></script>
     <script defer src="https://www.google.com/recaptcha/api.js?render=<?= getenv('GOOGLE_RECAPTCHA_SITE_KEY') ?>"></script>
     <script defer src="/js/inputmask.min.js"></script>
-    <script defer src="js/modals.js"></script>
+    <script defer src="/js/modals.js"></script>
 </header>
