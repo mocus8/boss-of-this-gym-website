@@ -1,18 +1,15 @@
-<?php 
-session_start();
-require_once __DIR__ . '/src/envLoader.php';
-?>
-
 <!DOCTYPE html>
 <html>
 	<head>
 		<meta charset="utf-8">
 		<title>Интернет-магазин "Boss Of This Gym"</title>
-		<link rel="stylesheet" href="styles.css">
+        <link rel="canonical" href="<?= htmlspecialchars($baseUrl, ENT_QUOTES) ?>/cart">
+        <link rel="icon" href="/public/favicon.ico" type="image/x-icon">
+		<link rel="stylesheet" href="/styles.css">
 	</head>
 	<body class="body">
         <div class="loader-overlay" id="loader">
-            <img class="loader" src="img/loader.png" alt="Загрузка">
+            <img class="loader" src="/img/loader.png" alt="Загрузка">
         </div>
         <div class="desktop">
             <?php
@@ -22,12 +19,12 @@ require_once __DIR__ . '/src/envLoader.php';
 
             <main class="main">
                 <div class="button_return_position">
-                    <a href="index.php">
+                    <a href="/">
                         <div class="button_return">
                             <div class="button_return_text">
                                 На главную
                             </div>
-                            <img class="button_return_img" src="img/arrow_back.png">
+                            <img class="button_return_img" src="/img/arrow_back.png">
                         </div>
                     </a>
                 </div>
@@ -59,17 +56,17 @@ require_once __DIR__ . '/src/envLoader.php';
                                 <div class="product_interaction">
                                     <div class="product_interaction_count">
                                         <button class="product_sign_button">
-                                            <img class="product_interaction_sign" src="img/minus.png" data-subtract-cart data-product-id="<?= $item['id'] ?>">
+                                            <img class="product_interaction_sign" src="/img/minus.png" data-subtract-cart data-product-id="<?= $item['id'] ?>">
                                         </button>
                                         <div class="product_interaction_amount" id="cart-counter-<?= $item['id'] ?>">
                                             <?= $item['amount'] ?>
                                         </div>
                                         <button class="product_sign_button">
-                                            <img class="product_interaction_sign" src="img/plus.png" data-add-cart data-product-id="<?= $item['id'] ?>">
+                                            <img class="product_interaction_sign" src="/img/plus.png" data-add-cart data-product-id="<?= $item['id'] ?>">
                                         </button>
                                     </div>
                                     <button class="product_sign_button">
-                                        <img class="product_interaction_delete" src="img/trash.png" data-remove-cart data-product-id="<?= $item['id'] ?>">
+                                        <img class="product_interaction_delete" src="/img/trash.png" data-remove-cart data-product-id="<?= $item['id'] ?>">
                                     </button>
                                 </div>
                             </div>
@@ -80,7 +77,7 @@ require_once __DIR__ . '/src/envLoader.php';
                     ?>
                 </div>
                 <div class="cart_right">
-                    <img class="order_icon" src="img/cart.png">
+                    <img class="order_icon" src="/img/cart.png">
                     <div class="order_inf">
                         <div class="order_inf_price_text">
                             Сумма заказа
@@ -99,7 +96,7 @@ require_once __DIR__ . '/src/envLoader.php';
                     if ($cartCount != 0) {
                         if ($idUser) {
                     ?>
-                        <a href="order_making.php" class="order-button-link">
+                        <a href="/order-making" class="order-button-link">
                             <div class="order_start">
                                 <div class="order_start_text">
                                     Оформить заказ
@@ -124,6 +121,6 @@ require_once __DIR__ . '/src/envLoader.php';
             </main>
             <?php require_once __DIR__ . '/footer.php'; ?>
         </div>
-        <script defer type="module" src="js/cart.js"></script>
+        <script defer type="module" src="/js/cart.js"></script>
 	</body>
 </html>

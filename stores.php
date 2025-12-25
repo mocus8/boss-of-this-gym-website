@@ -1,7 +1,3 @@
-<?php
-session_start();
-require_once __DIR__ . '/src/envLoader.php';
-?>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -9,23 +5,25 @@ require_once __DIR__ . '/src/envLoader.php';
 		<title>
             Интернет-магазин "Boss Of This Gym"
 		</title>
-		<link rel="stylesheet" href="styles.css">
+        <link rel="canonical" href="<?= htmlspecialchars($baseUrl, ENT_QUOTES) ?>/stores">
+        <link rel="icon" href="/public/favicon.ico" type="image/x-icon">
+		<link rel="stylesheet" href="/styles.css">
 	</head>
 	<body class="body">
         <div class="loader-overlay" id="loader">
             <!-- <div class="loading-text">Загрузка...</div> -->
-            <img class="loader" src="img/loader.png" alt="Загрузка">
+            <img class="loader" src="/img/loader.png" alt="Загрузка">
         </div>
         <div class="desktop">
             <?php require_once __DIR__ . '/header.php';?>
             <main class="main">
                 <div class="button_return_position">
-                    <a href="index.php">
+                    <a href="/">
                         <div class="button_return">
                             <div class="button_return_text">
                                 На главную
                             </div>
-                            <img class="button_return_img" src="img/arrow_back.png">
+                            <img class="button_return_img" src="/img/arrow_back.png">
                         </div>
                     </a>
                 </div>
@@ -38,7 +36,7 @@ require_once __DIR__ . '/src/envLoader.php';
                 <!-- здесь начало перебора магазинов -->
                 <script defer>
                 // Загружаем магазины из БД
-                fetch('src/getStores.php')
+                fetch('/src/getStores.php')
                 .then(response => response.json())
                 .then(stores => {
 
@@ -88,7 +86,7 @@ require_once __DIR__ . '/src/envLoader.php';
                 </script>
                 <div class="stores_right">
                     <div class="stores_map_loader">
-                        <img class="loader" src="img/loader.png" alt="Загрузка карты">
+                        <img class="loader" src="/img/loader.png" alt="Загрузка карты">
                     </div>
                     <div class="yandex_map_back"></div>
                     <div id="stores-map" class="stores-map-absolute"></div>
@@ -100,6 +98,6 @@ require_once __DIR__ . '/src/envLoader.php';
             <?php require_once __DIR__ . '/footer.php'; ?>
         </div>
         <script src="https://api-maps.yandex.ru/2.1/?apikey=<?= getenv('YANDEX_MAPS_KEY') ?>&lang=ru_RU"></script>
-        <script defer src="js/maps.js"></script>
+        <script defer src="/js/maps.js"></script>
 	</body>
 </html>

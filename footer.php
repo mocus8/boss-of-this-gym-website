@@ -5,7 +5,7 @@
                 Внимание: Этот сайт создан для демонстрации навыков разработки и не осуществляет реальную коммерческую деятельность.
             </div>
             <div class="footer_disklamer_href">
-                <a href="privacy.php" class="colour_href">Политика конфиденциальности</a>
+                <a href="/privacy" class="colour_href">Политика конфиденциальности</a>
             </div>
         </div>
         <div class="footer_mail">
@@ -13,13 +13,13 @@
         </div>
         <div class="footer_social">
             Наши соцсети:
-            <a href="https://vk.com/zabijaka1488" target="_blank"><img class="footer_social_img" src="img/vk.png"></a>
-            <a href="https://t.me/sldkvil" target="_blank"><img class="footer_social_img" src="img/tg.png"></a>
+            <a href="https://vk.com/zabijaka1488" target="_blank"><img class="footer_social_img" src="/img/vk.png"></a>
+            <a href="https://t.me/sldkvil" target="_blank"><img class="footer_social_img" src="/img/tg.png"></a>
         </div>
         <div class="footer_pay">
-            <img class="footer_pay_img" src="img/visa.png">
-            <img class="footer_pay_img" src="img/mir.png">
-            <img class="footer_pay_img" src="img/master_card.png">
+            <img class="footer_pay_img" src="/img/visa.png">
+            <img class="footer_pay_img" src="/img/mir.png">
+            <img class="footer_pay_img" src="/img/master_card.png">
         </div>
     </div>
 </footer>

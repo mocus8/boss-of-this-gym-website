@@ -68,7 +68,7 @@ function handleCartAction(productId, action) {
     const button = event.target;
     button.disabled = true;
 
-    fetchWithRetry("src/addRemoveCart.php", {
+    fetchWithRetry("/src/addRemoveCart.php", {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -116,7 +116,7 @@ function handleCartAction(productId, action) {
 
 // Функция для добавления товара в корзину со страниц товаров
 function manipulateCartFromProductPage(productId, action) {
-    fetchWithRetry("src/addRemoveCart.php", {
+    fetchWithRetry("/src/addRemoveCart.php", {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",

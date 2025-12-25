@@ -293,7 +293,7 @@ document
                     response.status === 409 &&
                     result.error === "ORDER_ALREADY_PAID"
                 ) {
-                    window.location.href = `/order.php?orderId=${orderId}`;
+                    window.location.href = `/order/${orderId}`;
                     return;
                 }
 

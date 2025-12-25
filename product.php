@@ -1,13 +1,9 @@
 <?php
-session_start();
-require_once __DIR__ . '/src/helpers.php';
-require_once __DIR__ . '/src/envLoader.php';
-
 // ОБЪЯВЛЯЕМ ПЕРЕМЕННЫЕ ДО ИХ ИСПОЛЬЗОВАНИЯ
 $cartSessionId = getCartSessionId();
 $idUser = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : '';
 
-// Получаем slug товара из URL через .htaccess
+// Получаем slug товара из URL
 $productSlug = $_GET['url'] ?? '';
 
 // ПОДКЛЮЧАЕМСЯ К БД
@@ -115,23 +111,24 @@ foreach ($cartItems as $item) {
 	<head>
 		<meta charset="utf-8">
 		<title><?= htmlspecialchars($productName) ?> - Boss Of This Gym</title>
-		<base href="/">
+        <link rel="canonical" href="<?= htmlspecialchars($baseUrl, ENT_QUOTES) ?>/product/<?= urlencode($productSlug) ?>">
+        <link rel="icon" href="/public/favicon.ico" type="image/x-icon">
 		<link rel="stylesheet" href="/styles.css">
 	</head>
 	<body class="body">
         <div class="loader-overlay" id="loader">
-            <img class="loader" src="img/loader.png" alt="Загрузка">
+            <img class="loader" src="/img/loader.png" alt="Загрузка">
         </div>
         <div class="desktop">
             <?php require_once __DIR__ . '/header.php'; ?>
             <main class="main">
                 <div class="product_left">
-                    <a href="index.php">
+                    <a href="/">
                         <div class="button_return">
                             <div class="button_return_text">
                                 На главную
                             </div>
-                            <img class="button_return_img" src="img/arrow_back.png">
+                            <img class="button_return_img" src="/img/arrow_back.png">
                         </div>
                     </a>
                     <div class="product_minor_images">
@@ -166,17 +163,17 @@ foreach ($cartItems as $item) {
                     </button>
                     <div class="product_button_add_in_cart" type="button" id="product-button-add-in-cart">
                         <button class="product_sign_button">
-                            <img class="product_interaction_sign" src="img/minus.png" data-product-subtract-cart data-product-id="<?= $productId ?>">
+                            <img class="product_interaction_sign" src="/img/minus.png" data-product-subtract-cart data-product-id="<?= $productId ?>">
                         </button>
                             <span id="product-cart-counter"><?= $cartAmount ?></span>
                         <button class="product_sign_button">
-                            <img class="product_interaction_sign" src="img/plus.png" data-product-add-cart data-product-id="<?= $productId ?>"> 
+                            <img class="product_interaction_sign" src="/img/plus.png" data-product-add-cart data-product-id="<?= $productId ?>"> 
                         </button>
                     </div>
                 </div>
             </main>
             <?php require_once __DIR__ . '/footer.php'; ?>
         </div>
-        <script defer src="js/cart.js"></script>
+        <script defer src="/js/cart.js"></script>
 	</body>
 </html>

@@ -78,7 +78,7 @@ function getCartData() {
                     'name' => $item['name'],
                     'price' => $item['price'],
                     'amount' => $item['amount'],
-                    'image_path' => !empty($item['image_path']) ? '/'.$item['image_path'] : '/img/default.png'
+                    'image_path' => !empty($item['image_path']) ? $item['image_path'] : '/img/default.png'
                 ];
 
                 $cartTotalPrice += $item['price'] * $item['amount'];

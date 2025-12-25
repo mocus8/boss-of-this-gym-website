@@ -1,9 +1,7 @@
 <?php
-session_start();
-
 // Если пользователь не авторизирован то перекидываем на главную
 if (!isset($_SESSION['user']['id'])) {
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 ?>
@@ -15,7 +13,9 @@ if (!isset($_SESSION['user']['id'])) {
 		<title>
             Интернет-магазин "Boss Of This Gym"
 		</title>
-		<link rel="stylesheet" href="styles.css">
+        <link rel="canonical" href="<?= htmlspecialchars($baseUrl, ENT_QUOTES) ?>/my-orders">
+        <link rel="icon" href="/public/favicon.ico" type="image/x-icon">
+		<link rel="stylesheet" href="/styles.css">
 	</head>
 	<body class="body">
         <div class="loader-overlay" id="loader">
@@ -72,12 +72,12 @@ if (!isset($_SESSION['user']['id'])) {
             ?>
             <main class="main">
                 <div class="button_return_position">
-                    <a href="index.php">
+                    <a href="/">
                         <div class="button_return">
                             <div class="button_return_text">
                                 На главную
                             </div>
-                            <img class="button_return_img" src="img/arrow_back.png">
+                            <img class="button_return_img" src="/img/arrow_back.png">
                         </div>
                     </a>
                 </div>
@@ -137,7 +137,7 @@ if (!isset($_SESSION['user']['id'])) {
                                     } ?> 
                                 </div>
 
-                                <a href="order.php?orderId=<?= $order['order_id'] ?>">
+                                <a href="/order/<?= htmlspecialchars($order['order_id']) ?>">
                                     <div class="order_button">
                                         Перейти к заказу
                                     </div>

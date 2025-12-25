@@ -23,7 +23,7 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active,
 input:autofill,
-input:autofill:hover, 
+input:autofill:hover,
 input:autofill:focus,
 input:autofill:active {
     -webkit-text-fill-color: #000000 !important;
@@ -59,15 +59,15 @@ input:autofill:active {
 }
 
 ::-webkit-scrollbar {
-    width: 0.75vw;  
+    width: 0.75vw;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #BD1B1B;
+    background: #bd1b1b;
     border-radius: 0.2vw;
 }
 
@@ -148,13 +148,21 @@ button {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes progressShrink {
-    0% { width: 100%; }
-    100% { width: 0%; }
+    0% {
+        width: 100%;
+    }
+    100% {
+        width: 0%;
+    }
 }
 
 .desktop {
@@ -169,7 +177,7 @@ button {
     opacity: 1;
 }
 
-.header{
+.header {
     z-index: 99;
     position: relative;
     width: 100%;
@@ -187,27 +195,29 @@ button {
     font-family: "Jost", Arial;
 }
 
-.boss_of_this_gym{
+.boss_of_this_gym {
     position: absolute;
     left: 2.5%;
     top: 10%;
     font-size: 2.5vw;
     font-family: "Jaro", Arial;
-    text-shadow: 0.2vw 0.2vw 0.4vw rgba(0, 0, 0, 0.5); 
+    text-shadow: 0.2vw 0.2vw 0.4vw rgba(0, 0, 0, 0.5);
 }
 
-.icon_billy {
+.billy {
     position: absolute;
     left: 4%;
     bottom: 4%;
     object-fit: fill;
     height: 6.5vw;
     transform-origin: bottom;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
     background-color: transparent;
 }
 
-.icon_billy:hover {
+.billy:hover {
     transform: scaleX(1.1);
     filter: drop-shadow(0.2vw 0.2vw 0.4vw rgba(0, 0, 0, 0.5));
 }
@@ -221,7 +231,7 @@ button {
     display: flex;
 }
 
-.header_button{
+.header_button {
     position: relative;
     width: 25%;
     height: 100%;
@@ -232,7 +242,9 @@ button {
     justify-content: center;
     align-items: center;
     white-space: nowrap;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .header_button:hover {
@@ -240,13 +252,13 @@ button {
     filter: drop-shadow(0.2vw 0.2vw 0.4vw rgba(0, 0, 0, 0.5));
 }
 
-.header_button_click{
+.header_button_click {
     position: absolute;
     width: 100%;
     height: 100%;
 }
 
-.header_button_icon{
+.header_button_icon {
     position: relative;
     width: 10%;
     height: 50%;
@@ -315,7 +327,9 @@ button {
     right: 1.5vw;
     font-size: 1.75vw;
     font-family: "Jost", Arial;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .header_search_cancel_button:hover {
@@ -326,7 +340,7 @@ button {
 
 .header_search_cancel_button:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .query_products_container {
@@ -347,7 +361,9 @@ button {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 3.25vw;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
 }
 
 .search_empty {
@@ -364,9 +380,9 @@ button {
 }
 
 .header_account {
-    position: absolute;  
-    right: 1.5%;      
-    bottom: 0;   
+    position: absolute;
+    right: 1.5%;
+    bottom: 0;
     width: 20.25%;
     height: 63.5%;
     background-image: url("./img/header_account_back.svg");
@@ -418,7 +434,9 @@ button {
 .header_account_button_logged_in {
     width: 2vw;
     height: 2vw;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .header_account_button_logged_in_icon {
@@ -434,7 +452,7 @@ button {
 
 .header_account_button_logged_in:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .header_account_button_guest {
@@ -451,7 +469,9 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
     background-color: transparent;
 }
 
@@ -463,7 +483,7 @@ button {
 
 .header_account_button_guest:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .header_modal {
@@ -487,7 +507,9 @@ button {
     right: 0.75vw;
     font-size: 1.5vw;
     font-family: "Jost", Arial;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .header_modal_close_btn:hover {
@@ -498,7 +520,7 @@ button {
 
 .header_modal_close_btn:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .header_modal_top {
@@ -532,13 +554,13 @@ button {
     height: 0.75vw;
     background-color: black;
     background-image: linear-gradient(
-        45deg, 
-        rgba(255, 255, 255, 0.1) 25%, 
-        transparent 25%, 
-        transparent 50%, 
-        rgba(255, 255, 255, 0.1) 50%, 
-        rgba(255, 255, 255, 0.1) 75%, 
-        transparent 75%, 
+        45deg,
+        rgba(255, 255, 255, 0.1) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.1) 75%,
+        transparent 75%,
         transparent
     );
     background-size: 20px 20px;
@@ -555,10 +577,12 @@ button {
     top: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, .3);
+    background-color: rgba(0, 0, 0, 0.3);
     visibility: hidden;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .authorization_modal {
@@ -644,7 +668,9 @@ button {
     background-color: transparent;
     font-size: 1.75vw;
     font-family: "Jost", Arial;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .authorization_modal_button:hover {
@@ -655,7 +681,7 @@ button {
 
 .authorization_modal_button:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .authorization_modal_blur.open {
@@ -677,7 +703,7 @@ button {
 
 .uknown_user_back {
     position: absolute;
-    margin-top: 2vw;;
+    margin-top: 2vw;
     margin-left: 22vw;
     width: 17.5vw;
     height: 3vw;
@@ -691,7 +717,9 @@ button {
     gap: 0.5vw;
     visibility: hidden;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .uknown_user_back.open {
@@ -701,7 +729,7 @@ button {
 
 .wrong_password_back {
     position: absolute;
-    margin-top: 2vw;;
+    margin-top: 2vw;
     margin-left: 26vw;
     width: 11vw;
     height: 3vw;
@@ -716,7 +744,9 @@ button {
     gap: 0.5vw;
     visibility: hidden;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .wrong_password_back.open {
@@ -731,10 +761,12 @@ button {
     top: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, .3);
+    background-color: rgba(0, 0, 0, 0.3);
     visibility: hidden;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .registration_modal {
@@ -783,7 +815,7 @@ button {
 .registration_modal_input_back.short {
     width: 22.5vw;
     background-image: none;
-    background-color: #4B4B4B;
+    background-color: #4b4b4b;
     border: 0.1vw solid black;
     border-radius: 0.5vw;
 }
@@ -797,10 +829,10 @@ button {
 .registration_modal_sms_code_button {
     position: relative;
     margin-top: 1%;
-    margin-left:auto;
+    margin-left: auto;
     width: max-content;
     height: 2.9vw;
-    background-color: #4B4B4B;
+    background-color: #4b4b4b;
     border: 0.1vw solid black;
     border-radius: 0.5vw;
     white-space: nowrap;
@@ -816,7 +848,7 @@ button {
 
 .registration_modal_sms_code_button:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .registration_modal_input_text {
@@ -840,7 +872,7 @@ button {
 
 .old_password_missmatch_back {
     position: absolute;
-    margin-top: 5.5vw;;
+    margin-top: 5.5vw;
     margin-left: 26vw;
     width: 11vw;
     height: 3vw;
@@ -855,7 +887,9 @@ button {
     gap: 0.5vw;
     visibility: hidden;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .old_password_missmatch_back.open {
@@ -885,7 +919,9 @@ button {
     background-color: transparent;
     font-size: 1.5vw;
     font-family: "Jost", Arial;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .registration_modal_button:hover {
@@ -896,7 +932,7 @@ button {
 
 .registration_modal_button:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .registration_modal_blur.open {
@@ -906,7 +942,7 @@ button {
 
 .user_already_exists_back {
     position: absolute;
-    margin-top: 2vw;;
+    margin-top: 2vw;
     margin-left: 26.5vw;
     width: 11.5vw;
     height: 3vw;
@@ -919,7 +955,9 @@ button {
     gap: 0.5vw;
     visibility: hidden;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .user_already_exists_back.open {
@@ -929,7 +967,7 @@ button {
 
 .incorrect_sms_code_back {
     position: absolute;
-    margin-top: 7.25vw;;
+    margin-top: 7.25vw;
     margin-left: 18vw;
     width: 11.5vw;
     height: 3vw;
@@ -943,7 +981,9 @@ button {
     gap: 0.5vw;
     visibility: hidden;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .incorrect_sms_code_back.open {
@@ -953,7 +993,7 @@ button {
 
 .incorrect_phone_number_back {
     position: absolute;
-    margin-top: 3.75vw;;
+    margin-top: 3.75vw;
     margin-left: 24vw;
     width: 15vw;
     height: 3vw;
@@ -966,7 +1006,9 @@ button {
     gap: 0.5vw;
     visibility: hidden;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .incorrect_phone_number_back.open {
@@ -976,7 +1018,7 @@ button {
 
 .password_mismatch_back {
     position: absolute;
-    margin-top: 9vw;;
+    margin-top: 9vw;
     margin-left: 26.5vw;
     width: 12.5vw;
     height: 3vw;
@@ -989,7 +1031,9 @@ button {
     gap: 0.5vw;
     visibility: hidden;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .password_mismatch_back.open {
@@ -1023,7 +1067,9 @@ button {
 .account_edit_modal_password_button {
     font-size: 1.5vw;
     font-family: "Jost", Arial;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -1038,7 +1084,7 @@ button {
 
 .account_edit_modal_password_button:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .account_delete_modal {
@@ -1085,7 +1131,7 @@ button {
     transform: translateX(-50%);
     width: 97%;
     height: 100%;
-    background-color: #BD1B1B;
+    background-color: #bd1b1b;
     display: flex;
     gap: 4%;
 }
@@ -1121,7 +1167,7 @@ button {
     margin-left: auto;
     margin-right: auto;
     max-width: 60vw;
-    background-color: #BD1B1B;
+    background-color: #bd1b1b;
     border: 0.15vw solid black;
     border-radius: 1.25vw;
     padding: 0.25vw 1vw 1vw 1vw;
@@ -1138,7 +1184,9 @@ button {
     text-align: center;
     display: flex;
     align-items: center;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .footer_social {
@@ -1156,7 +1204,9 @@ button {
     margin-left: 6%;
     width: 5vw;
     height: 5vw;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .footer_social_img:hover {
@@ -1178,7 +1228,6 @@ button {
     width: 5vw;
     height: 2.75vw;
 }
-
 
 .colour_href:hover {
     color: blue;
@@ -1203,15 +1252,22 @@ button {
 .category_name {
     width: 13%;
     height: 4vw;
-    background-image: url("./img/side_button_click.svg"), url("./img/side_button_back.svg");
-    background-position: 20% 55%, 0% 0%;
+    background-image:
+        url("./img/side_button_click.svg"), url("./img/side_button_back.svg");
+    background-position:
+        20% 55%,
+        0% 0%;
     background-repeat: no-repeat, no-repeat;
-    background-size: 85% 77.5%, 100% 120%;
+    background-size:
+        85% 77.5%,
+        100% 120%;
     padding-left: 1vw;
     display: flex;
     align-items: center;
     transform-origin: left center;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
     background-color: transparent;
     font-size: 1.3vw;
     font-family: "Jost", Arial;
@@ -1236,7 +1292,9 @@ button {
     justify-content: center;
     align-items: center;
     filter: drop-shadow(0.2vw 0.2vw 0.4vw rgba(0, 0, 0, 0.5));
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .product:hover {
@@ -1246,7 +1304,7 @@ button {
 
 .product:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .product_click {
@@ -1306,12 +1364,20 @@ button {
     margin-bottom: 10%;
     width: 14.5%;
     height: 7.5vw;
-    background-image: url("./img/button_return_click.svg"), url("./img/button_return_back.svg");
-    background-position: 37.5% 25%, 0% 0%;
+    background-image:
+        url("./img/button_return_click.svg"),
+        url("./img/button_return_back.svg");
+    background-position:
+        37.5% 25%,
+        0% 0%;
     background-repeat: no-repeat, no-repeat;
-    background-size: 82.5% 75%, 100% 100%;
+    background-size:
+        82.5% 75%,
+        100% 100%;
     transform-origin: left top;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .button_return:hover {
@@ -1321,7 +1387,7 @@ button {
 
 .button_return:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .button_return_text {
@@ -1356,7 +1422,9 @@ button {
 }
 
 .product_minor_images_button {
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .product_minor_images_button:hover {
@@ -1367,7 +1435,9 @@ button {
 
 .product_minor_images_button:active {
     transform: scale(1);
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .product_img_2 {
@@ -1407,7 +1477,7 @@ button {
     padding-bottom: 1.5vw;
     width: 97.2%;
     height: auto;
-    background-color: #BD1B1B;
+    background-color: #bd1b1b;
     font-size: 1.4vw;
     font-family: "Jost", Arial;
 }
@@ -1466,10 +1536,15 @@ button {
     width: 55%;
     height: 6.5vw;
     box-sizing: border-box;
-    background-image: url("./img/side_button_click.svg"), url("./img/side_button_back.svg");
-    background-position: 20% 55%, 0% 0%;
+    background-image:
+        url("./img/side_button_click.svg"), url("./img/side_button_back.svg");
+    background-position:
+        20% 55%,
+        0% 0%;
     background-repeat: no-repeat, no-repeat;
-    background-size: 85% 77.5%, 100% 120%;
+    background-size:
+        85% 77.5%,
+        100% 120%;
     text-align: left;
     padding-left: 1.135vw;
     padding-top: 0;
@@ -1477,7 +1552,9 @@ button {
     font-family: "Jost", Arial;
     background-color: transparent;
     transform-origin: left top;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
     display: none;
     opacity: 0;
     /* transition: opacity .4s, visibility .4s; */
@@ -1491,7 +1568,7 @@ button {
 
 .product_button_add_not_in_cart:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .product_button_add_not_in_cart.open {
@@ -1506,10 +1583,15 @@ button {
     width: 55%;
     height: 6.5vw;
     box-sizing: border-box;
-    background-image: url("./img/side_button_click.svg"), url("./img/side_button_back.svg");
-    background-position: 20% 55%, 0% 0%;
+    background-image:
+        url("./img/side_button_click.svg"), url("./img/side_button_back.svg");
+    background-position:
+        20% 55%,
+        0% 0%;
     background-repeat: no-repeat, no-repeat;
-    background-size: 85% 77.5%, 100% 120%;
+    background-size:
+        85% 77.5%,
+        100% 120%;
     display: flex;
     align-items: center;
     gap: 8%;
@@ -1583,7 +1665,9 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .cart_product:hover {
@@ -1593,7 +1677,7 @@ button {
 
 .cart_product:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .cart_product_name {
@@ -1652,11 +1736,11 @@ button {
     height: 2.5vw;
 }
 
-.product_interaction_amount{
+.product_interaction_amount {
     position: relative;
     font-size: 1.3vw;
     font-weight: 600;
-    font-family: "Jost", Arial; 
+    font-family: "Jost", Arial;
 }
 
 .product_interaction_delete {
@@ -1690,7 +1774,7 @@ button {
 .order_inf {
     position: relative;
     width: 100%;
-    height: 20vw;;
+    height: 20vw;
     background-image: url("./img/header_account_back.svg");
     background-repeat: no-repeat;
     background-size: 100% 100%;
@@ -1746,14 +1830,21 @@ button {
     margin-left: 47.5%;
     width: 55.75%;
     height: 5.5vw;
-    background-image: url("./img/order_start_click.svg"), url("./img/order_start_back.svg");
-    background-position: 75% 55%, 0% 0%;
+    background-image:
+        url("./img/order_start_click.svg"), url("./img/order_start_back.svg");
+    background-position:
+        75% 55%,
+        0% 0%;
     background-repeat: no-repeat, no-repeat;
-    background-size: 85% 77.5%, 100% 120%;
+    background-size:
+        85% 77.5%,
+        100% 120%;
     display: flex;
     align-items: center;
     transform-origin: right top;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .order_start:hover {
@@ -1765,7 +1856,7 @@ button {
 .order_start:active {
     transform: scale(1);
     transition: transform 0.05s ease;
-    cursor: pointer
+    cursor: pointer;
 }
 
 .order_start_text {
@@ -1870,7 +1961,9 @@ button {
     padding-left: 4%;
     padding-top: 0.25vw;
     transform-origin: left center;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .store_button:hover {
@@ -1916,10 +2009,12 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
-    background:#BD1B1B;
+    background: #bd1b1b;
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.4s ease, visibility 0.4s ease;
+    transition:
+        opacity 0.4s ease,
+        visibility 0.4s ease;
 }
 
 #stores-map {
@@ -2009,7 +2104,9 @@ button {
     font-size: 1.5vw;
     font-family: "Jost", Arial;
     text-align: center;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .order_type.chosen {
@@ -2062,13 +2159,13 @@ button {
     border: 0.15vw solid black;
     outline: none;
     border-radius: 0.5vw;
-    background-color: #4B4B4B;
+    background-color: #4b4b4b;
     font-size: 1.3vw;
     font-family: "Jost", Arial;
 }
 
 .map_search_input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px #4B4B4B inset;
+    -webkit-box-shadow: 0 0 0px 1000px #4b4b4b inset;
     -webkit-text-fill-color: #000;
 }
 
@@ -2105,7 +2202,7 @@ button {
 }
 
 .suggestions-suggestion:hover {
-    background-color: #4B4B4B;
+    background-color: #4b4b4b;
     color: white;
 }
 
@@ -2114,7 +2211,7 @@ button {
 }
 
 .suggestions-selected {
-    background-color: #4B4B4B;
+    background-color: #4b4b4b;
     color: white;
 }
 
@@ -2128,11 +2225,13 @@ button {
     box-sizing: border-box;
     border: 0.15vw solid black;
     border-radius: 0.5vw;
-    background-color: #4B4B4B;
+    background-color: #4b4b4b;
     text-align: center;
     font-size: 1.3vw;
     font-family: "Jost", Arial;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .map_search_btn:hover {
@@ -2143,7 +2242,7 @@ button {
 
 .map_search_btn:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .map_container {
@@ -2157,13 +2256,15 @@ button {
 .order_map_loader {
     width: 35vw;
     height: 35vw;
-    background-color: #BD1B1B; 
+    background-color: #bd1b1b;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 1;
     visibility: visible;
-    transition: opacity .2s, visibility .2s;
+    transition:
+        opacity 0.2s,
+        visibility 0.2s;
 }
 
 .error_stores_map {
@@ -2173,7 +2274,7 @@ button {
     right: 2.6vw;
     width: 60.5vw;
     height: 42.7vw;
-    background-color: #BD1B1B;
+    background-color: #bd1b1b;
     visibility: hidden;
     pointer-events: none;
     display: flex;
@@ -2182,7 +2283,9 @@ button {
     font-size: 2.5vw;
     font-family: "Jost", Arial;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .error_stores_map.open {
@@ -2197,7 +2300,7 @@ button {
     height: 100%;
     border: 0.15vw solid black;
     border-radius: 0.5vw;
-    background-color: #BD1B1B;
+    background-color: #bd1b1b;
     visibility: hidden;
     pointer-events: none;
     display: flex;
@@ -2206,7 +2309,9 @@ button {
     font-size: 2.5vw;
     font-family: "Jost", Arial;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .error_delivery_map.open {
@@ -2221,7 +2326,7 @@ button {
     height: 100%;
     border: 0.15vw solid black;
     border-radius: 0.5vw;
-    background-color: #BD1B1B;
+    background-color: #bd1b1b;
     visibility: hidden;
     pointer-events: none;
     display: flex;
@@ -2230,7 +2335,9 @@ button {
     font-size: 2.5vw;
     font-family: "Jost", Arial;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .error_pickup_map.open {
@@ -2257,7 +2364,9 @@ button {
     font-weight: 100;
     visibility: hidden;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .error_address_not_found.open {
@@ -2282,7 +2391,7 @@ button {
 .order_info {
     padding: 0vw 1vw 1.5vw 1vw;
     border-radius: 0.5vw;
-    background: #BD1B1B;
+    background: #bd1b1b;
     height: min-content;
 }
 
@@ -2295,7 +2404,7 @@ button {
 .order_right_products_row {
     font-size: 1.75vw;
     font-family: "Jost", Arial;
-    white-space: nowrap
+    white-space: nowrap;
 }
 
 .order_right_row {
@@ -2312,7 +2421,7 @@ button {
     padding: 0.5vw 1vw 0.5vw 1vw;
     border: 0.15vw solid black;
     border-radius: 0.5vw;
-    background-color: #4B4B4B;
+    background-color: #4b4b4b;
     text-align: center;
     font-size: 2.25vw;
     font-family: "Jost", Arial;
@@ -2326,7 +2435,7 @@ button {
 
 .order_right_pay_button:active {
     transform: scale(1);
-    transition: transform 0.05s ease
+    transition: transform 0.05s ease;
 }
 
 .order_rigth_notification {
@@ -2359,7 +2468,7 @@ button {
     height: max-content;
 }
 
-.error_pay{
+.error_pay {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -2379,7 +2488,9 @@ button {
     font-weight: 100;
     /* visibility: hidden;
     opacity: 0; */
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 /* .error_pay.open {
@@ -2400,7 +2511,7 @@ button {
     padding: 0 0.5vw;
     border: 0.15vw solid black;
     border-radius: 0.5vw;
-    background-color: #BD1B1B;
+    background-color: #bd1b1b;
     white-space: nowrap;
     font-size: 1.3vw;
     font-family: "Jost", Arial;
@@ -2422,7 +2533,7 @@ button {
     height: min-content;
     border: 0.15vw solid black;
     border-radius: 0.5vw;
-    background-color: #BD1B1B;
+    background-color: #bd1b1b;
     padding: 1vw 1vw 1vw 1vw;
     display: flex;
     flex-direction: column;
@@ -2463,12 +2574,14 @@ button {
 .order_action_button {
     display: block;
     border: 0.15vw solid black;
-    background-color: #4B4B4B;
+    background-color: #4b4b4b;
     border-radius: 0.5vw;
     padding: 0.5vw 2.75vw 0.5vw 2.75vw;
     font-size: 1.75vw;
     font-family: "Jost", Arial;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .order_action_button:hover {
@@ -2500,7 +2613,7 @@ button {
     position: relative;
     margin-bottom: 1vw;
     border-radius: 0.75vw;
-    background-color: #BD1B1B;
+    background-color: #bd1b1b;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -2528,9 +2641,11 @@ button {
     padding: 0.5vw 1vw 0.5vw 1vw;
     border: 0.15vw solid black;
     border-radius: 0.5vw;
-    background-color: #4B4B4B;
+    background-color: #4b4b4b;
     text-align: center;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
 }
 
 .order_button:hover {
@@ -2564,7 +2679,9 @@ button {
     font-weight: 100;
     visibility: hidden;
     opacity: 0;
-    transition: opacity .4s, visibility .4s;
+    transition:
+        opacity 0.4s,
+        visibility 0.4s;
 }
 
 .order_error.open {
