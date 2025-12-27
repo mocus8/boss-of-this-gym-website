@@ -110,7 +110,9 @@ foreach ($cartItems as $item) {
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title><?= htmlspecialchars($productName) ?> - Boss Of This Gym</title>
+		<title>
+            <?= htmlspecialchars($productName) ?> - Gym Boss
+        </title>
         <link rel="canonical" href="<?= htmlspecialchars($baseUrl, ENT_QUOTES) ?>/product/<?= urlencode($productSlug) ?>">
         <link rel="icon" href="/public/favicon.ico" type="image/x-icon">
 		<link rel="stylesheet" href="/styles.css">

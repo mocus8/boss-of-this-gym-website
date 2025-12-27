@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>
-            Интернет-магазин "Boss Of This Gym"
+            Gym Boss - спорттовары
 		</title>
         <link rel="canonical" href="<?= htmlspecialchars($baseUrl, ENT_QUOTES) ?>/contacts">
         <link rel="icon" href="/public/favicon.ico" type="image/x-icon">

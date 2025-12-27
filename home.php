@@ -88,7 +88,7 @@ if (function_exists('getCartSessionId')) {
 	<head>
 		<meta charset="utf-8">
 		<title>
-            Интернет-магазин "Boss Of This Gym"
+            Gym Boss - спорттовары
 		</title>
         <link rel="canonical" href="<?= htmlspecialchars($canonical, ENT_QUOTES) ?>">
         <link rel="icon" href="/public/favicon.ico" type="image/x-icon">
