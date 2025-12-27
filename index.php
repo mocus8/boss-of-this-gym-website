@@ -56,7 +56,7 @@ elseif (preg_match('#^/order/([0-9]+)$#', $uri, $matches)) {
 // Любой другой путь - 404
 else {
     http_response_code(404);
-    require __DIR__ . '/404.php';
+    require __DIR__ . '/src/pages/404.php';
     exit;
 }
 ?>
