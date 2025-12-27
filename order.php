@@ -181,7 +181,7 @@ require_once __DIR__ . '/src/getOrderData.php';
         <meta charset="utf-8">
         <meta name="robots" content="noindex, nofollow">
 		<title>
-            Интернет-магазин "Boss Of This Gym"
+            Gym Boss - спорттовары
 		</title>
         <link rel="icon" href="/public/favicon.ico" type="image/x-icon">
 		<link rel="stylesheet" href="/styles.css">

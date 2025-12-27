@@ -54,8 +54,8 @@ if ($idUser != '') {
         <div class="internet_shop">
             Интернет-магазин спортивной атрибутики
         </div>
-        <div class="boss_of_this_gym">
-            “Boss Of This Gym”
+        <div class="gym_boss">
+            “Gym Boss”
         </div>
         <img class="billy" src="/img/billy.svg" alt="Мужик, качёк, крутой парень, Билли Харрингтон">
 <!--                                                                        Добавлять этот атрибут для CEO-->
