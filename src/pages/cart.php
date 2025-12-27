@@ -6,8 +6,7 @@ require_once __DIR__ . '/../getCartInfo.php';
 
 $title  = 'Корзина товаров - Gym Boss';
 $robots = 'noindex,nofollow';
-// Какие js нужны этой странице (если не нужны не указываем)
-$pageScripts = ['/js/cart.js']; 
+$pageScripts = ['/js/cart.js'];
 
 // Через буфер записываем в переменную контент страницы
 ob_start();
