@@ -36,10 +36,25 @@ $canonical = $canonical ?? $defaultCanonical;
             <?php require_once __DIR__ . '/../partials/footer.php'; ?>
         </div>
 
-        <!-- Подключаем скрипты если запрашивается в контроллере -->
+        <!-- Подключаем разные скрипты -->
+
+        <!-- Обязательные для всех страниц -->
+        <script defer src="/js/loader.js"></script>
+        <script defer src="/js/modals.js"></script>
+        <script defer src="https://www.google.com/recaptcha/api.js?render=<?= getenv('GOOGLE_RECAPTCHA_SITE_KEY') ?>"></script>
+        <script defer src="/js/inputmask.min.js"></script>
+
+        <!-- Внешние и обычные из контроллера -->
         <?php if (!empty($pageScripts) && is_array($pageScripts)) { ?>
             <?php foreach ($pageScripts as $script) { ?>
-                <script defer type="module" src="<?= htmlspecialchars($script, ENT_QUOTES, 'UTF-8') ?>"></script>
+                <script defer src="<?= htmlspecialchars($script, ENT_QUOTES, 'UTF-8') ?>"></script>
+            <?php } ?>
+        <?php } ?>
+
+        <!-- Модульные из контроллера -->
+        <?php if (!empty($pageModuleScripts) && is_array($pageModuleScripts)) { ?>
+            <?php foreach ($pageModuleScripts as $script) { ?>
+                <script type="module" src="<?= htmlspecialchars($script, ENT_QUOTES, 'UTF-8') ?>"></script>
             <?php } ?>
         <?php } ?>
 	</body>

@@ -83,7 +83,11 @@ if (function_exists('getCartSessionId')) {
 // $title  = 'Gym Boss - спорттовары'; - тут тайтл по умолчанию в app.php, не указваем
 // $robots = 'noindex,nofollow'; - индексируется по умолчанию app.php, не указваем
 $canonical = $baseUrl . '/'; // добавляем "/" чтобы получить каноникал главной страницы как https://gymboss.ru/
-// $pageScripts = ['/js/cart.js']; - какие скрипты нужны для страницы, тут не нужны - не указываем
+// $pageScripts = [
+// '/js/cart.js',
+// 'https://api-maps.yandex.ru/2.1/?apikey=' . urlencode(getenv('YANDEX_MAPS_KEY')) . '&lang=ru_RU&load=package.full'
+// ]; - какие внешние и обычные скрипты (без import/export, например просто обработчики) нужны для страницы, тут не нужны - не указываем
+// $pageModuleScripts = ['/js/cart.js']; - какие модульные (есть import/export) скрипты нужны для страницы, тут не нужны - не указываем
 
 // Через буфер записываем в переменную контент страницы
 ob_start();
