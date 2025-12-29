@@ -1,3 +1,12 @@
+// Показ ошибки списка магазинов
+function showStoresListError(error) {
+    console.error("Ошибка загрузки магазинов:", error);
+    const container = document.getElementById("stores-list");
+    if (container) {
+        container.innerHTML = "<p>Магазины временно недоступны</p>";
+    }
+}
+
 // Показ ошибки карты (по параметру)
 function showMapError(type = "all") {
     const VALID_TYPES = ["stores", "delivery", "pickup", "all"];
@@ -32,6 +41,147 @@ function showMapError(type = "all") {
     }
 
     elements.forEach((block) => block.classList.add("open"));
+}
+
+// Список магазинов
+async function initStoresList() {
+    // Загружаем магазины из БД, перебор магазинов и отображение в список
+    try {
+        // Если нет контейнера - ошибку
+        const container = document.getElementById("stores-list");
+        if (!container) {
+            throw new Error("stores-list не найден");
+        }
+
+        // Получаем магазины из api
+        const response = await fetch("/src/getStores.php");
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const stores = await response.json();
+
+        // Очищаем содержимое блока
+        container.innerHTML = "";
+
+        stores.forEach((store) => {
+            if (store.coordinates && store.coordinates.length === 2) {
+                // Получаем ссылку на магазин на картах (на адресс)
+                const yandexMapsUrl = `https://yandex.ru/maps/?text=${encodeURIComponent(store.address.replace(/<br>/g, ", "))}`;
+
+                // // Меняем HTML блока через .innerHTML
+
+                // const storeHTML = `
+                //     <div class="store">
+                //         <div class="store_name">
+                //         <strong>${store.name}</strong>
+                //         </div>
+                //         <div class="store_address">
+                //             Адрес:<br>
+                //             ${store.address}
+                //         </div>
+                //         <div class="store_time">
+                //             Время работы:<br>
+                //             ${store.work_hours.replace(/\n/g, "<br>")}
+                //         </div>
+                //         <div class="store_time">
+                //             Телефон:<br>
+                //             <a href='tel: ${store.phone}' class="colour_href">
+                //                 <div style="margin-top: 10px;">${store.phone}</div>
+                //             </a>
+                //         </div>
+                //         <a href="${yandexMapsUrl}" target="_blank">
+                //             <div class="store_button">
+                //                 На карте
+                //             </div>
+                //         </a>
+                //     </div>
+                // `;
+                // container.innerHTML += storeHTML;
+
+                // // Меняем HTML блока через работу с DOM узлами
+
+                // Корневой блок магазина
+                const storeDiv = document.createElement("div");
+                storeDiv.className = "store";
+
+                // Название магазина
+                const nameDiv = document.createElement("div");
+                nameDiv.className = "store_name";
+
+                const nameStrong = document.createElement("strong");
+                nameStrong.textContent = store.name;
+                nameDiv.appendChild(nameStrong);
+
+                // Адрес магазина
+                const addressDiv = document.createElement("div");
+                addressDiv.className = "store_address";
+
+                const addressTitle = document.createElement("span");
+                addressTitle.innerHTML = "Адрес:<br>";
+                const addressContent = document.createElement("span");
+                addressContent.innerHTML = store.address;
+
+                addressDiv.appendChild(addressTitle);
+                addressDiv.appendChild(addressContent);
+
+                // Время работы
+                const timeDiv = document.createElement("div");
+                timeDiv.className = "store_time";
+
+                const timeTitle = document.createElement("span");
+                timeTitle.innerHTML = "Время работы:<br>";
+
+                const timeContent = document.createElement("span");
+                timeContent.innerHTML = store.work_hours.replace(/\n/g, "<br>");
+
+                timeDiv.appendChild(timeTitle);
+                timeDiv.appendChild(timeContent);
+
+                // Телефон
+                const phoneDiv = document.createElement("div");
+                phoneDiv.className = "store_time";
+
+                const phoneTitle = document.createElement("span");
+                phoneTitle.innerHTML = "Телефон:<br>";
+
+                const phoneLink = document.createElement("a");
+                phoneLink.href = `tel:${store.phone}`;
+                phoneLink.className = "colour_href";
+
+                const phoneInnerDiv = document.createElement("div");
+                phoneInnerDiv.style.marginTop = "10px";
+                phoneInnerDiv.textContent = store.phone;
+
+                phoneLink.appendChild(phoneInnerDiv);
+                phoneDiv.appendChild(phoneTitle);
+                phoneDiv.appendChild(phoneLink);
+
+                // Кнопка "На карте"
+                const mapLink = document.createElement("a");
+                mapLink.href = yandexMapsUrl;
+                mapLink.target = "_blank";
+
+                const mapButton = document.createElement("div");
+                mapButton.className = "store_button";
+                mapButton.textContent = "На карте";
+
+                mapLink.appendChild(mapButton);
+
+                // Собираем всё в один блок
+                storeDiv.appendChild(nameDiv);
+                storeDiv.appendChild(addressDiv);
+                storeDiv.appendChild(timeDiv);
+                storeDiv.appendChild(phoneDiv);
+                storeDiv.appendChild(mapLink);
+
+                // Добавляем магазин в контейнер
+                container.appendChild(storeDiv);
+            }
+        });
+    } catch (error) {
+        showStoresListError(error);
+    }
 }
 
 // Карта магазинов
@@ -103,6 +253,52 @@ function initStoresMap() {
             loader.style.display = "none";
         }, 200);
     }
+}
+
+// Промис загрузки скриптов DaData (типа флага, но асинхронный, его можно ожидать await)
+let dadataPromise = null;
+
+// Функция загрузки скрипта DaData
+function loadDaDataScript() {
+    // Если уже есть обещание то ничего не делаем
+    if (dadataPromise) {
+        return dadataPromise;
+    }
+
+    // Присваиваем промису значение функции
+    dadataPromise = new Promise((resolve, reject) => {
+        // Создаем тег <script> в памяти (не реально в документе)
+        const script = document.createElement("script");
+
+        // URL для скрипта
+        const url = `https://cdn.jsdelivr.net/npm/@dadata/suggestions@25.4.1/dist/suggestions.min.js`;
+
+        // Вставляем в скрипт URL
+        script.src = url;
+
+        // Обработчик на загрузку скрипта
+        script.onload = () => {
+            if (!window.Dadata) {
+                reject(
+                    new Error(
+                        "DaData скрипт загрузился, но window.Dadata не найден"
+                    )
+                );
+                return;
+            }
+            resolve(); // промис выполнен успешно
+        };
+
+        // Обработчик на ошибку скрипта
+        script.onerror = () => {
+            reject(new Error("Ошибка загрузки скрипта DaData"));
+        };
+
+        // Вставляем скрипт в DOM
+        document.head.appendChild(script);
+    });
+
+    return dadataPromise;
 }
 
 // Класс через ES6 для карты доставки, конструктор с параметром (контейнер для создания в нем карты)
@@ -376,6 +572,9 @@ class DeliveryMap {
     async #initDaData() {
         try {
             if (this.#daDataInitialized) return;
+
+            // Ждем загрузки скриптов DaData
+            await loadDaDataScript();
 
             if (this.#addressInput) {
                 const response = await fetch("/src/serviceProxy.php");
@@ -868,45 +1067,119 @@ class PickupMap {
 // объявляем переменную для карты (т.к. она одна на страницу)
 let pickupMap = null;
 
-if (typeof ymaps === "undefined") {
-    showMapError();
-} else {
-    ymaps.ready(() => {
-        // Карта магазинов (если она видна на странице)
-        if (document.getElementById("stores-map")) {
-            try {
-                initStoresMap();
-            } catch (error) {
-                console.error("Ошибка карты магазинов:", error);
-                showMapError("stores");
+// Промис загрузки скриптов для карт (типа флага, но асинхронный, его можно ожидать await)
+let yandexMapsPromise = null;
+
+function loadYandexMapsScripts() {
+    // Если уже есть обещание то ничего не делаем
+    if (yandexMapsPromise) {
+        return yandexMapsPromise;
+    }
+
+    // Присваиваем промису значение функции
+    yandexMapsPromise = new Promise((resolve, reject) => {
+        // Создаем тег <script> в памяти (не реально в документе)
+        const script = document.createElement("script");
+
+        // Получаем ip ключ для карт
+        const key = document.body?.dataset?.yandexMapsKey;
+        if (!key) {
+            reject(new Error("YANDEX_MAPS_KEY не найден в data-атрибуте body"));
+            return;
+        }
+
+        // Собираем URL для скрипта
+        const url = `https://api-maps.yandex.ru/2.1/?apikey=${encodeURIComponent(key)}&lang=ru_RU&load=package.full`;
+
+        // Вставляем в скрипт URL
+        script.src = url;
+
+        // Обработчик на загрузку скрипта
+        script.onload = () => {
+            if (!window.ymaps) {
+                reject(
+                    new Error(
+                        "Yandex Maps скрипт загрузился, но ymaps не найден"
+                    )
+                );
+                return;
             }
-        }
+            resolve(); // промис выполнен успешно
+        };
 
-        // Карты оформления заказа (проверяем API ключ)
-        // Карта доставки (если есть и видна)
-        const deliveryModal = document.getElementById(
-            "modal-order-type-delivery"
-        );
-        if (
-            document.getElementById("delivery-map") &&
-            deliveryModal &&
-            !deliveryModal.classList.contains("hidden")
-        ) {
-            ymaps
-                .geocode("Москва", { results: 1 })
-                .then(() => {
-                    // создаем карту если ее нет
-                    if (!deliveryMap) {
-                        deliveryMap = new DeliveryMap("delivery-map");
-                    }
-                })
-                .catch((error) => {
-                    // API не работает
-                    console.error("Неверный API ключ Яндекс.Карт:", error);
-                    showMapError("delivery");
-                });
-        }
+        // Обработчик на ошибку скрипта
+        script.onerror = () => {
+            reject(new Error("Ошибка загрузки скрипта Yandex Maps"));
+        };
 
-        // Карта самовывоза будет инициализироваться в обработчике переключения типа
+        // Вставляем скрипт в DOM
+        document.head.appendChild(script);
     });
+
+    return yandexMapsPromise;
 }
+
+// Функция для инициализации карт
+function initAllMaps() {
+    // Отображение списка магазинов (если есть на странице)
+    if (document.getElementById("stores-list")) {
+        initStoresList();
+    }
+
+    // Отображение нужных карт
+    if (typeof ymaps === "undefined") {
+        showMapError();
+    } else {
+        ymaps.ready(() => {
+            // Карта магазинов (если она видна на странице)
+            if (document.getElementById("stores-map")) {
+                try {
+                    initStoresMap();
+                } catch (error) {
+                    console.error("Ошибка карты магазинов:", error);
+                    showMapError("stores");
+                }
+            }
+
+            // Карты оформления заказа (проверяем API ключ)
+            // Карта доставки (если есть и видна)
+            const deliveryModal = document.getElementById(
+                "modal-order-type-delivery"
+            );
+            if (
+                document.getElementById("delivery-map") &&
+                deliveryModal &&
+                !deliveryModal.classList.contains("hidden")
+            ) {
+                ymaps
+                    .geocode("Москва", { results: 1 })
+                    .then(() => {
+                        // создаем карту если ее нет
+                        if (!deliveryMap) {
+                            deliveryMap = new DeliveryMap("delivery-map");
+                        }
+                    })
+                    .catch((error) => {
+                        // API не работает
+                        console.error("Неверный API ключ Яндекс.Карт:", error);
+                        showMapError("delivery");
+                    });
+            }
+
+            // Карта самовывоза будет инициализироваться в обработчике переключения типа
+        });
+    }
+}
+
+// Запускаем асинхронную загрузку скрипта Яндекс.Карт
+// Функция loadYandexMapsScripts сразу возвращает Promise (объект ожидания результата)
+loadYandexMapsScripts()
+    // Эта функция НЕ вызывается сразу, она будет вызвана когда Promise перейдёт в состояние "успех" (resolve)
+    .then(() => {
+        initAllMaps();
+    })
+    // Эта функция НЕ вызывается сразу, она будет вызвана если Promise завершится с ошибкой (reject)
+    .catch((error) => {
+        console.error("[Maps] Не удалось загрузить скрипты карт:", error);
+        showMapError();
+    });
