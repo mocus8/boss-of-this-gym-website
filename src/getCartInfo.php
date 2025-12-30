@@ -1,6 +1,4 @@
 <?php
-require_once __DIR__ . '/bootstrap.php';
-
 // ПОДКЛЮЧАЕМСЯ К БД И ПОЛУЧАЕМ ДАННЫЕ КОРЗИНЫ
 function getCartData(mysqli $db) {
 
