@@ -1,7 +1,10 @@
 <?php
 // тут помимо прочих исправлений нужно номер телефона проверять валидировать и т д
 
-require_once __DIR__ . '/src/bootstrap.php';
+// Подключаем bootstrap (общая инициализация) и получаем переменные (не засоряем глобальную область)
+$config = require_once __DIR__ . '/src/bootstrap.php';
+$db      = $config['db'];
+$baseUrl = $config['baseUrl'];
 
 header('Content-Type: application/json');
 

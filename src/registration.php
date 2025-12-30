@@ -1,5 +1,9 @@
 <?php
-require_once __DIR__ . '/bootstrap.php';
+// Подключаем bootstrap (общая инициализация) и получаем переменные (не засоряем глобальную область)
+$config = require_once __DIR__ . '/bootstrap.php';
+$db      = $config['db'];
+$baseUrl = $config['baseUrl'];
+
 require_once __DIR__ . '/secure/captchaVerification.php';
 
 // тут нужна еще проверка CSRF токенов и ограничение частоты запросов. это все через laravel можно сделать

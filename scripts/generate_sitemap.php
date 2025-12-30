@@ -2,7 +2,10 @@
 // Генератор sitemap.xml для учебного проекта
 // Запуск: docker-compose exec php php /var/www/html/scripts/generate_sitemap.php
 
-require_once __DIR__ . '/../src/bootstrap.php';
+// Подключаем bootstrap (общая инициализация) и получаем переменные (не засоряем глобальную область)
+$config = require_once __DIR__ . '/../src/bootstrap.php';
+$db      = $config['db'];
+$baseUrl = $config['baseUrl'];
 
 // Получаем URL сайта из переменных окружения
 $appUrl = getenv('APP_URL');

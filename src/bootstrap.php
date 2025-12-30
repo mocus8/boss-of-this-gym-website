@@ -40,3 +40,9 @@ if (!$appUrl) {
 }
 
 $baseUrl   = rtrim($appUrl, '/');
+
+// Возвращаем переменные, чтобы не засорять глобальную область
+return [
+    'db'      => $db,
+    'baseUrl' => $baseUrl,
+];

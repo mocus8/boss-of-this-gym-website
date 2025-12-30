@@ -1,5 +1,8 @@
 <?php
-require_once __DIR__ . '/src/bootstrap.php';
+// Подключаем bootstrap (общая инициализация) и получаем переменные (не засоряем глобальную область)
+$config = require_once __DIR__ . '/src/bootstrap.php';
+$db      = $config['db'];
+$baseUrl = $config['baseUrl'];
 
 use YooKassa\Model\Notification\NotificationFactory;
 

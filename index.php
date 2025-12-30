@@ -1,8 +1,10 @@
 <?php
 // Единая точка входа, проостейший роутер
 
-// Подключаем bootstrap (общая инициализация)
-require_once __DIR__ . '/src/bootstrap.php';
+// Подключаем bootstrap (общая инициализация) и получаем переменные (не засоряем глобальную область)
+$config = require_once __DIR__ . '/src/bootstrap.php';
+$db      = $config['db'];
+$baseUrl = $config['baseUrl'];
 
 // Разбор URI
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

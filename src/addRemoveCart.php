@@ -1,7 +1,10 @@
 <?php
 // тут не хватает многих проверок для продакшена, потом зарефакторить с остальными api
 
-require_once __DIR__ . '/bootstrap.php';
+// Подключаем bootstrap (общая инициализация) и получаем переменные (не засоряем глобальную область)
+$config = require_once __DIR__ . '/bootstrap.php';
+$db      = $config['db'];
+$baseUrl = $config['baseUrl'];
 
 header('Content-Type: application/json');
 

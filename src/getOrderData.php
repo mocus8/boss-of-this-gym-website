@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/bootstrap.php';
 
 function getOrderData($orderId, mysqli $db) {
     // Инициализация переменных по умолчанию
