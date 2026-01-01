@@ -1,21 +1,67 @@
 <?php
-// Единая точка входа, проостейший роутер
+// Единая точка входа, роутер, и для web и для php
 
 // Подключаем bootstrap (общая инициализация)
 require_once __DIR__ . '/src/bootstrap.php';
 
-// Разбор URI
+// Подключаем пространства имен
+use App\Cart\CartService;    // используем класс CartService из пространства имен App\Cart
+use App\Api\CartController;    // используем класс CartController из пространства имен App\Api
+
+// Разбор URI (и метода)
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = rtrim($uri, '/');
+$method = $_SERVER['REQUEST_METHOD'];    // GET, POST и т.д.
 
-// Маршруты требуещие авторизации
+$userId = getCurrentUserId();
+
+// Api-маршруты
+if (strpos($uri, '/api/') === 0) {
+    // убираем префикс /api
+    $apiPath = substr($uri, strlen('/api'));
+
+    // создаём сервис и контроллер
+    $cartService    = new CartService($db);
+    $cartController = new CartController($cartService);
+
+    // Определение api маршрутов
+    $apiRoutes = [
+        'GET' => [
+            '/cart'                => [$cartController, 'getCart'],
+        ],
+        'POST' => [
+            '/cart/add-item'       => [$cartController, 'addItem'],
+            '/cart/update-item-qty'=> [$cartController, 'updateItemQty'],
+            '/cart/remove-item'    => [$cartController, 'removeItem'],
+            '/cart/clear'          => [$cartController, 'clear'],
+        ],
+    ];
+
+    // Если маршрут есть в списке, подключаем соответствующий метод cartController
+    if (isset($apiRoutes[$method][$apiPath])) {
+        $handler = $apiRoutes[$method][$apiPath];    // handler - массив [объект контроллера][строка с именем метода]
+        call_user_func($handler);    // вызываем метод
+        exit;
+    }
+
+    // Любой другой путь - 404-й статус и json ответ с указанием
+    http_response_code(404);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'success' => false,
+        'error'   => 'API endpoint not found',
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// Web-маршруты
+
+// Web маршруты, требуещие авторизации
 $protectedRoutes = [
     '/my-orders',
     '/order-making',
     // сюда же можно добавить ещё маршрутов закрытых для неавторизированных пользователей
 ];
-
-$userId = getCurrentUserId();
 
 // Если маршрут требует авторизации и пользователь не залогинен — на главную
 if (in_array($uri, $protectedRoutes, true) && $userId === null) {
@@ -23,7 +69,7 @@ if (in_array($uri, $protectedRoutes, true) && $userId === null) {
     exit;
 }
 
-// Определение маршрутов
+// Определение web маршрутов
 $routes = [
     ''              => 'home.php',
     '/'             => 'home.php',

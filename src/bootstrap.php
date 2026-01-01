@@ -4,12 +4,13 @@
 session_start();
 
 // Подключаем общие файлы
-require_once __DIR__ . '/../vendor/autoload.php';   // подключаем composer
+require_once __DIR__ . '/../vendor/autoload.php';    // подключаем composer
 require_once __DIR__ . '/envLoader.php';    // подключаем загрузчик .env файла
-require_once __DIR__ . '/support/helpers.php'; // подключаем файл с вспомогательными утилитами
-require_once __DIR__ . '/Db/Db.php'; // подключаем файл с классом для подключения к бд
-require_once __DIR__ . '/Cart/CartSession.php'; // подключаем файл с классом для получения/установки cart id в куках
-require_once __DIR__ . '/Cart/CartService.php'; // подключаем файл с классом-сервисом для управления корзинами пользователей
+require_once __DIR__ . '/support/helpers.php';    // подключаем файл с вспомогательными утилитами
+require_once __DIR__ . '/Db/Db.php';    // подключаем файл с классом для подключения к бд
+require_once __DIR__ . '/Cart/CartSession.php';    // подключаем файл с классом для получения/установки cart id в куках
+require_once __DIR__ . '/Cart/CartService.php';    // подключаем файл с классом-сервисом для управления корзинами пользователей
+require_once __DIR__ . '/Api/CartController.php';    // подключаем файл с классом-контроллером для управления корзинами пользователей
 
 // Подключаем пространства имен
 use App\Db\Db;  // используем класс Db из пространства имен App\Db
