@@ -2,6 +2,8 @@
 
 require_once __DIR__ . '/bootstrap.php';
 
+$userId = getCurrentUserId();
+
 if (!$userId) {
     header("Location: /");
     exit;

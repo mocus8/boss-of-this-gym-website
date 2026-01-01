@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Получаем данные из POST
 $productId = (int)($_POST['product_id'] ?? 0);
 $action = $_POST['action'] ?? '';
+$userId = getCurrentUserId();
 
 // Валидация
 if (!$productId || !$action) {

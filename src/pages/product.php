@@ -42,6 +42,8 @@ if ($productImages) {
     $mainImage = '/img/default.png';
 }
 
+$userId = getCurrentUserId();
+
 // Получаем данные корзины
 if ($userId) {
     $stmt = $db->prepare("

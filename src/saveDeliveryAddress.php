@@ -10,6 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode($json, true);
     $delivery_type = $data['delivery_type'] ?? 'delivery';
 
+    $userId = getCurrentUserId();
+
     if (!$userId) {
         echo json_encode(['success' => false, 'message' => 'Пользователь не авторизован']);
         exit;

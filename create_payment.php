@@ -7,6 +7,7 @@ header('Content-Type: application/json');
 
 $input = json_decode(file_get_contents('php://input'), true);
 $orderId = $input['order_id'] ?? '';
+$userId = getCurrentUserId();
 
 if (!$userId || !$orderId) {
     http_response_code(400); // Bad Request

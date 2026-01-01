@@ -23,8 +23,7 @@ $db = Db::connectFromEnv();
 $cartSession = new CartSession();
 $cartSessionId = $cartSession->getId();
 
-// Полчаем id user-а из сессии
-$userId = $_SESSION['user']['id'] ?? null;
+$userId = getCurrentUserId();
 
 // Работаем с сервисом корзины
 $cartService = new CartService($db);    // создаем экземпляр класса

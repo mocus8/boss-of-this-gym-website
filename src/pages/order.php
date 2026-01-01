@@ -3,6 +3,7 @@
 
 // Тут зарефакторить и новые коды ошибок добавить в utils
 
+$userId = getCurrentUserId();
 $orderId = $_GET['orderId'] ?? '';
 $paidAt = null;
 

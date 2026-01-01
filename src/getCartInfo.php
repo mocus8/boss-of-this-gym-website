@@ -100,6 +100,8 @@ function getCartData(?int $userId, ?string $cartSessionId, \mysqli $db) {    // 
     ];
 }
 
+$userId = getCurrentUserId();
+
 // Получаем данные с проверкой на ошибки
 $cartData = getCartData($userId, $cartSessionId, $db);
 $cartOrderId = $cartData['cart_id'];

@@ -24,6 +24,8 @@ try {
         throw new Exception('Failed to prepare statement');
     }
 
+    $userId = getCurrentUserId();
+
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     $result = $stmt->get_result();

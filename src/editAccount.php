@@ -6,6 +6,7 @@ header('Content-Type: application/json');
 $oldPassword = $_POST['oldPassword'];
 $newPassword = $_POST['newPassword'];
 $name = $_POST['name'];
+$userId = getCurrentUserId();
 
 if ($userId == '') {
     header("Location: /");
