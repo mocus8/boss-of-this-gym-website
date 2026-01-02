@@ -9,21 +9,24 @@
 namespace App\Api;
 
 use App\Cart\CartService;    // используем класс CartService из пространства имен App\Cart
+use App\Cart\CartSession;    // используем класс CartSession из пространства имен App\Cart
 // use App\Support\Logger;    // пространство имен для логгера, на будующее
 
 // Класс для управления корзинами пользователей (через методы сервиса)
 class CartController {
-    private CartService $cart;    // приватное свойство (переменная класса), привязанная к объекту
+    private CartSession $cartSession;    // приватное свойство (переменная класса), привязанная к объекту
+    private CartService $cartService;    // приватное свойство (переменная класса), привязанная к объекту
     // private Logger $logger;    // Логгер для передачи в зависимость в конструкторе, потом подключить
 
-    // Конструктор (магический метод), присваиваем внеший созданный экземпляр CartService в переменную создоваемого объекта
-    public function __construct(CartService $cart) {
-        $this->cart = $cart;
+    // Конструктор (магический метод), присваиваем внеший экземпляр CartService и CartSession в переменные создоваемого объекта
+    public function __construct(CartSession $cartSession, CartService $cartService) {
+        $this->cartSession = $cartSession;
+        $this->cartService = $cartService;
     }
 
     // Будующий онструктор (магический метод), просто присваиваем внешюю $db в переменную создоваемого объекта
-    // public function __construct(CartService $cart, Logger $logger) {
-    //     $this->cart = $cart;
+    // public function __construct(CartService $cartService, Logger $logger) {
+    //     $this->cartService = $cartService;
     //     $this->logger = $logger;
     // }
 
@@ -62,15 +65,15 @@ class CartController {
     // Обработчик запроса GET /api/cart
     public function getCart(): void {
         try {
-            $cartSessionId = $_COOKIE['cart_session_id'] ?? '';
+            $cartSessionId = $this->cartSession->getId();
             $userId = getCurrentUserId();
 
-            $cartId = $this->cart->getOrCreateCartId($cartSessionId, $userId);
+            $cartId = $this->cartService->getOrCreateCartId($cartSessionId, $userId);
 
             // Используем методы класса CartService 
-            $items = $this->cart->getItems($cartId);
-            $count = $this->cart->getItemsCount($cartId);
-            $total = $this->cart->getItemsTotal($cartId);
+            $items = $this->cartService->getItems($cartId);
+            $count = $this->cartService->getItemsCount($cartId);
+            $total = $this->cartService->getItemsTotal($cartId);
 
             // Возвращаем успех через приватную функцию
             $this->success(200, [
@@ -96,10 +99,10 @@ class CartController {
     // Метод для добавления товара в корзину, обработчик запроса POST /api/cart/add-item 
     public function addItem(): void {
         try {
-            $cartSessionId = $_COOKIE['cart_session_id'] ?? '';
+            $cartSessionId = $this->cartSession->getId();
             $userId = getCurrentUserId();
 
-            $cartId = $this->cart->getOrCreateCartId($cartSessionId, $userId);
+            $cartId = $this->cartService->getOrCreateCartId($cartSessionId, $userId);
 
             // Как $productId = $_POST['product_id'] ?? ''; только со строгой валидацией, другой синтаксис
             $productId = filter_input(INPUT_POST, 'product_id', FILTER_VALIDATE_INT);
@@ -112,7 +115,7 @@ class CartController {
             }
 
             // Через метод класса CartService добавляем в бд добавляем/прибавляем опр-ое кол-во товара в корзину
-            $this->cart->addItem($cartId, $productId, $qty);
+            $this->cartService->addItem($cartId, $productId, $qty);
 
             $this->success(201);    // ресурс создан
 
@@ -136,10 +139,10 @@ class CartController {
     // Метод для удаления товара из корзины, обработчик запроса POST /api/cart/remove-item 
     public function removeItem(): void {
         try {
-            $cartSessionId = $_COOKIE['cart_session_id'] ?? '';
+            $cartSessionId = $this->cartSession->getId();
             $userId = getCurrentUserId();
 
-            $cartId = $this->cart->getOrCreateCartId($cartSessionId, $userId);
+            $cartId = $this->cartService->getOrCreateCartId($cartSessionId, $userId);
 
             $productId = filter_input(INPUT_POST, 'product_id', FILTER_VALIDATE_INT);
 
@@ -149,7 +152,7 @@ class CartController {
             }
 
             // Через метод класса CartService удаляем товар из корзины в бд
-            $this->cart->removeItem($cartId, $productId);
+            $this->cartService->removeItem($cartId, $productId);
 
             $this->success();
 
@@ -169,10 +172,10 @@ class CartController {
     // Метод для обновления в бд опр-ого кол-ва товара в корзине, обработчик запроса POST /api/cart/update-item-qty
     public function updateItemQty(): void {
         try {
-            $cartSessionId = $_COOKIE['cart_session_id'] ?? '';
+            $cartSessionId = $this->cartSession->getId();
             $userId = getCurrentUserId();
 
-            $cartId = $this->cart->getOrCreateCartId($cartSessionId, $userId);
+            $cartId = $this->cartService->getOrCreateCartId($cartSessionId, $userId);
 
             $productId = filter_input(INPUT_POST, 'product_id', FILTER_VALIDATE_INT);
             $qty = filter_input(INPUT_POST, 'qty', FILTER_VALIDATE_INT);
@@ -183,7 +186,7 @@ class CartController {
             }
 
             // Через метод класса CartService обновляем в бд опр-ое кол-во товара в корзине
-            $this->cart->updateItemQty($cartId, $productId, $qty);
+            $this->cartService->updateItemQty($cartId, $productId, $qty);
 
             $this->success();
 
@@ -203,13 +206,13 @@ class CartController {
     // Метод для очистки корзины, обработчик запроса POST /api/cart/clear
     public function clear(): void {
         try {
-            $cartSessionId = $_COOKIE['cart_session_id'] ?? '';
+            $cartSessionId = $this->cartSession->getId();
             $userId = getCurrentUserId();
 
-            $cartId = $this->cart->getOrCreateCartId($cartSessionId, $userId);
+            $cartId = $this->cartService->getOrCreateCartId($cartSessionId, $userId);
 
             // Через метод класса CartService очищаем в бд корзину
-            $this->cart->clearCart($cartId);
+            $this->cartService->clearCart($cartId);
 
             $this->success();
 

@@ -16,6 +16,7 @@ require_once __DIR__ . '/Api/CartController.php';    // подключаем ф�
 use App\Db\Db;  // используем класс Db из пространства имен App\Db
 use App\Cart\CartSession;   // используем класс CartSession из пространства имен App\Cart
 use App\Cart\CartService;   // используем класс CartService из пространства имен App\Cart
+use App\Api\CartController;    // используем класс CartController из пространства имен App\Api
 
 // Подключение к БД через публичный, статический метод класса (не нужно создавать экземпляр)
 $db = Db::connectFromEnv();
@@ -30,6 +31,9 @@ $userId = getCurrentUserId();
 $cartService = new CartService($db);    // создаем экземпляр класса
 $cartId = $cartService->getOrCreateCartId($cartSessionId, $userId);    // получаем id корзины из бд
 $cartCount = $cartService->getItemsCount($cartId);    // получаем кол-во товаров в корзине (для отображения в хедере)
+
+// Создаем экземпляр api-контроллера корзины
+$cartController = new CartController($cartSession, $cartService);
 
 // Получаем URL сайта из переменных окружения
 $appUrl = getenv('APP_URL');

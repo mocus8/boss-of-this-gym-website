@@ -4,10 +4,6 @@
 // Подключаем bootstrap (общая инициализация)
 require_once __DIR__ . '/src/bootstrap.php';
 
-// Подключаем пространства имен
-use App\Cart\CartService;    // используем класс CartService из пространства имен App\Cart
-use App\Api\CartController;    // используем класс CartController из пространства имен App\Api
-
 // Разбор URI (и метода)
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = rtrim($uri, '/');
@@ -19,10 +15,6 @@ $userId = getCurrentUserId();
 if (strpos($uri, '/api/') === 0) {
     // убираем префикс /api
     $apiPath = substr($uri, strlen('/api'));
-
-    // создаём сервис и контроллер
-    $cartService    = new CartService($db);
-    $cartController = new CartController($cartService);
 
     // Определение api маршрутов
     $apiRoutes = [
