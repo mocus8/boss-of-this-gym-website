@@ -570,6 +570,90 @@ button {
     animation: progressShrink 5s linear forwards;
 }
 
+.notification {
+    z-index: 9999;
+    position: fixed;
+    right: 5%;
+    top: 5%;
+    padding: 1vw 3vw 1.5vw 3vw;
+    background-image: url("./img/contacts_back.svg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5vw;
+    filter: drop-shadow(1vw 1vw 1.6vw rgba(0, 0, 0, 0.75));
+}
+
+.notification_close_btn {
+    position: absolute;
+    top: 0.05vw;
+    right: 0.75vw;
+    font-size: 1.5vw;
+    font-family: "Jost", Arial;
+    transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
+}
+
+.notification_close_btn:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0.2vw 0.2vw 0.4vw rgba(0, 0, 0, 0.5));
+    cursor: pointer;
+}
+
+.notification_close_btn:active {
+    transform: scale(1);
+    transition: transform 0.05s ease;
+}
+
+.notification_top {
+    display: flex;
+    flex-direction: row;
+    gap: 1vw;
+    justify-content: center;
+}
+
+.notification_icon {
+    width: 3vw;
+    height: 3vw;
+}
+
+.notification_text {
+    font-size: 1.75vw;
+    font-family: "Jost", Arial;
+}
+
+.notification_progress {
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+    height: 0.75vw;
+    border-radius: 0.25vw;
+    border: 0.15vw solid black;
+}
+
+.notification_text_progress_fill {
+    width: 100%;
+    height: 0.75vw;
+    background-color: black;
+    background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.1) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.1) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 20px 20px;
+}
+
+.notification_text_progress_fill.shrinking {
+    animation: progressShrink 5s linear forwards;
+}
+
 .authorization_modal_blur {
     z-index: 999;
     position: fixed;
@@ -1555,9 +1639,6 @@ button {
     transition:
         transform 0.2s ease,
         filter 0.2s ease;
-    display: none;
-    opacity: 0;
-    /* transition: opacity .4s, visibility .4s; */
 }
 
 .product_button_add_not_in_cart:hover {
@@ -1569,11 +1650,6 @@ button {
 .product_button_add_not_in_cart:active {
     transform: scale(1);
     transition: transform 0.05s ease;
-}
-
-.product_button_add_not_in_cart.open {
-    display: block;
-    opacity: 1;
 }
 
 .product_button_add_in_cart {
@@ -1600,13 +1676,6 @@ button {
     font-family: "Jost", Arial;
     background-color: transparent;
     transform-origin: left top;
-    display: none;
-    opacity: 0;
-}
-
-.product_button_add_in_cart.open {
-    display: flex;
-    opacity: 1;
 }
 
 .cart_empty {

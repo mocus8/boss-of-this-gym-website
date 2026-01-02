@@ -11,7 +11,7 @@ $canonical = $canonical ?? $defaultCanonical;
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 	<head>
 		<meta charset="utf-8">
         <meta name="robots" content="<?= htmlspecialchars($robots, ENT_QUOTES, 'UTF-8') ?>">
@@ -34,6 +34,20 @@ $canonical = $canonical ?? $defaultCanonical;
                 <?= $content ?? '' ?>
             </main>
             <?php require_once __DIR__ . '/../partials/footer.php'; ?>
+        </div>
+
+        <!-- Tost-уведомление -->
+        <div class="notification hidden" id="notification">
+            <button class="notification_close_btn" id="notification-close-btn">✕</button>
+
+            <div class="notification_top">
+                <img class="notification_icon"src="/img/inf.png">
+                <div class="notification_text" id="notification-text"></div>
+            </div>
+            
+            <div class="notification_progress">
+                <div class="notification_text_progress_fill" id="notification-progress-fill"></div>
+            </div>
         </div>
 
         <!-- Подключаем разные скрипты -->
