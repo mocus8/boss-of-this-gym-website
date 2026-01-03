@@ -7,19 +7,19 @@ namespace App\Cart;
 class CartSession {
     public function getId(): string { // :string - тип возвращаемого значения
         // Если уже есть - просто возвращаем
-        if (!empty($_COOKIE['cart_session_id '])) {
-            return $_COOKIE['cart_session_id '];
+        if (!empty($_COOKIE['cart_session_id'])) {
+            return $_COOKIE['cart_session_id'];
         }
         
         // Генерируем надёжный случайный идентификатор
         $id = bin2hex(random_bytes(16));
 
         //Устанавливаем куку по новому, расширенному синтаксису (PHP 7.3+)
-        setcookie('cart_session', $id, [
+        setcookie('cart_session_id', $id, [
             'expires'  => time() + 86400 * 30,
             'path'     => '/',
             'domain'   => '',
-            'secure'   => true,
+            // 'secure'   => true, после перехода на https разблокировать
             'httponly' => true,
             'samesite' => 'Strict'
         ]);
